@@ -9,5 +9,4 @@ public class MmotorsApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(MmotorsApplication.class, args);
 	}
-
 }
