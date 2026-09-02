@@ -6,6 +6,10 @@
 	<title>M-Motors</title>
 </head>
 <body>
-	<p th:text="|${test}|"/>
+	<div th:insert="~{comps/nav}"></div>
+	
+	<div th:insert="~{${page}}"></div>
+
+	<!-- todo <div th:insert="~{comps/footer}"></div> -->
 </body>
 </html>
