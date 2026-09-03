@@ -1,1 +1,18 @@
-<p>testing testing 123</p>
+<nav class="navbar navbar-expand-lg">
+	<div class="container-fluid">
+		<a class="navbar-brand" href="/index">M-Motors</a>
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent" aria-controls="navContent" aria-expanded="false" aria-label="Menu de navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navContent">
+			<ul class="navbar-nav me-auto mb-2">
+				<li class="nav-item">
+					<a href="/index" class="nav-link" th:classappend="${#execInfo.processedTemplateName} == 'index' ? 'active'" aria-current="page">Accueil</a>
+				</li>
+				<li class="nav-item">
+					<a href="/test" class="nav-link" th:classappend="${#execInfo.processedTemplateName} == 'test' ? 'active'"  aria-current="page">test</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</nav>
