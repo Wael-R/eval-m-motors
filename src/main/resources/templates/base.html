@@ -10,8 +10,8 @@
 	<title>M-Motors[[${subtitle} != '' ? | - ${subtitle}|]]</title>
 </head>
 <body>
+	<div th:replace="~{comps/nav}"></div>
 	<div class="container-lg">
-		<div th:replace="~{comps/nav}"></div>
 		<div th:replace="${content}"></div>
 		<div th:replace="~{comps/footer}"></div>
 	</div>

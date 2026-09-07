@@ -1,18 +1,34 @@
-<nav class="navbar navbar-expand-lg">
-	<div class="container-fluid">
+<nav class="navbar navbar-expand-lg mb-3">
+	<div class="container-lg">
 		<a class="navbar-brand" href="/index">M-Motors</a>
 		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent" aria-controls="navContent" aria-expanded="false" aria-label="Menu de navigation">
 			<span class="navbar-toggler-icon"></span>
 		</button>
 		<div class="collapse navbar-collapse" id="navContent">
-			<ul class="navbar-nav me-auto mb-2">
-				<li class="nav-item">
-					<a href="/index" class="nav-link" th:classappend="${#execInfo.processedTemplateName} == 'index' ? 'active'" aria-current="page">Accueil</a>
-				</li>
-				<li class="nav-item">
-					<a href="/test" class="nav-link" th:classappend="${#execInfo.processedTemplateName} == 'test' ? 'active'"  aria-current="page">test</a>
-				</li>
-			</ul>
+			<a href="/index" class="nav-link col-1" th:classappend="${#execInfo.processedTemplateName} == 'index' ? 'active'">Accueil</a>
+			<!-- <form action="/search" class="col-8">
+				<div class="input-group">
+					<input type="text" class="form-control" name="query">
+					<button type="submit" class="btn btn-primary"></button>
+				</div>
+			</form> -->
+			<!-- <div> -->
+				<div th:if="${!loggedIn and #execInfo.processedTemplateName != 'login'}">
+					<a href="/login" class="btn btn-success">Connexion</a>
+				</div>
+				<div th:if="${!loggedIn and #execInfo.processedTemplateName != 'signup'}">
+					<a href="/signup" class="btn btn-secondary">Inscription</a>
+				</div>
+				<div class="dropdown" th:if="${loggedIn}">
+					<button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+						Mon compte
+					</button>
+					<ul class="dropdown-menu">
+						<li><a href="/account" class="dropdown-item">Mon espace client</a></li>
+						<li><a href="/logout" class="dropdown-item">Déconnexion</a></li>
+					</ul>
+				</div>
+			<!-- </div> -->
 		</div>
 	</div>
 </nav>
