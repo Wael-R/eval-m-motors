@@ -5,19 +5,19 @@
 			<span class="navbar-toggler-icon"></span>
 		</button>
 		<div class="collapse navbar-collapse" id="navContent">
-			<a href="/index" class="nav-link col-1" th:classappend="${#execInfo.processedTemplateName} == 'index' ? 'active'">Accueil</a>
-			<!-- <form action="/search" class="col-8">
+			<a href="/index" class="nav-link" th:classappend="${#execInfo.processedTemplateName} == 'index' ? 'active'">Accueil</a>
+			<form action="/search" class="flex-grow-1 mx-lg-4 my-2 my-lg-0">
 				<div class="input-group">
-					<input type="text" class="form-control" name="query">
-					<button type="submit" class="btn btn-primary"></button>
+					<input type="search" class="form-control" name="query" placeholder="Rechercher...">
+					<button type="submit" class="btn btn-primary" aria-label="Lancer la recherche"><i class="bi bi-search"></i></button>
 				</div>
-			</form> -->
-			<!-- <div> -->
-				<div th:if="${!loggedIn and #execInfo.processedTemplateName != 'login'}">
-					<a href="/login" class="btn btn-success">Connexion</a>
+			</form>
+			<div class="d-flex justify-content-between gx-2">
+				<div class="flex-grow-1" th:classappend="${#execInfo.processedTemplateName != 'signup'} ? 'me-2'" th:if="${!loggedIn and #execInfo.processedTemplateName != 'login'}">
+					<a href="/login" class="w-100 btn btn-success">Connexion</a>
 				</div>
-				<div th:if="${!loggedIn and #execInfo.processedTemplateName != 'signup'}">
-					<a href="/signup" class="btn btn-secondary">Inscription</a>
+				<div class="flex-grow-1" th:if="${!loggedIn and #execInfo.processedTemplateName != 'signup'}">
+					<a href="/signup" class="w-100 btn btn-secondary">Inscription</a>
 				</div>
 				<div class="dropdown" th:if="${loggedIn}">
 					<button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -28,7 +28,7 @@
 						<li><a href="/logout" class="dropdown-item">Déconnexion</a></li>
 					</ul>
 				</div>
-			<!-- </div> -->
+			</div>
 		</div>
 	</div>
 </nav>
