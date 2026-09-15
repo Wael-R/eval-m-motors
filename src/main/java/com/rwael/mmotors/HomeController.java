@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Controller
-public class HomeController {
+public class HomeController
+{
 	@ModelAttribute
 	public void isLoggedIn(Model model)
 	{

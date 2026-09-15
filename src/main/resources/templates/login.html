@@ -14,5 +14,26 @@
 			<button type="submit" class="btn btn-success">Connexion</button>
 		</form>
 	</div>
+	<script>
+		$("form").on("submit", (ev) => {
+			ev.preventDefault();
+
+			const body = {
+				email: $("#inputEmail").val(),
+				password: $("#inputPass").val(),
+			};
+
+			fetch("/api/login", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)})
+			.then(async (res) => {
+				if(!res.ok)
+					console.error(await res.json());
+				else
+					return res.text();
+			})
+			.then((res) => {
+				console.log(res);
+			});
+		})
+	</script>
 </main>
 </html>
