@@ -28,24 +28,20 @@
 		$("form").on("submit", (ev) => {
 			ev.preventDefault();
 
-			const body = {
-				email: $("#inputEmail").val(),
-				password: $("#inputPass").val(),
-				firstName: $("#inputFirstName").val(),
-				lastName: $("#inputLastName").val(),
-			};
-
-			fetch("/api/signup", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)})
-			.then(async (res) => {
-				if(!res.ok)
-					console.error(await res.json());
-				else
-					return res.text();
-			})
-			.then((res) => {
-				console.log(res);
-			});
-		})
+			jsonRequest("/api/signup", "POST", {
+					email: $("#inputEmail").val(),
+					password: $("#inputPass").val(),
+					firstName: $("#inputFirstName").val(),
+					lastName: $("#inputLastName").val(),
+				},
+				(res) => {
+					console.log(res);
+				},
+				(err) => {
+					console.error(err);
+				}
+			);
+		});
 	</script>
 </main>
 </html>
