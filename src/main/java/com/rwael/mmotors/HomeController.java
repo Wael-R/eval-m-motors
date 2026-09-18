@@ -1,20 +1,30 @@
 package com.rwael.mmotors;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 @Controller
 public class HomeController
 {
+	private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+
 	@ModelAttribute
-	public void isLoggedIn(Model model)
+	public void isLoggedIn(Model model, Authentication auth)
 	{
-		model.addAttribute("loggedIn", false);
+		if(auth != null)
+			model.addAttribute("loggedIn", auth.isAuthenticated());
+		else
+			model.addAttribute("loggedIn", false);
 	}
 
-	@GetMapping("/index")
+	@GetMapping("/")
 	public String getIndex(Model model)
 	{
 		return "index";
@@ -30,5 +40,25 @@ public class HomeController
 	public String getSignup()
 	{
 		return "signup";
+	}
+
+	@GetMapping("/logout")
+	public String getLogout(Authentication auth, HttpServletRequest request, HttpServletResponse response)
+	{
+		logoutHandler.logout(request, response, auth);
+
+		return "redirect:/";
+	}
+
+	@GetMapping("/private")
+	public String getPrivateTest(Model model)
+	{
+		return "index";
+	}
+
+	@GetMapping("/admin")
+	public String getAdminTest(Model model)
+	{
+		return "index";
 	}
 }
