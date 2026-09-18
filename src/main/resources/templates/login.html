@@ -5,15 +5,15 @@
 		<form>
 			<div class="mb-3">
 				<label for="inputEmail" class="form-label">Adresse e-mail</label>
-				<input type="email" class="form-control" id="inputEmail">
+				<input type="email" class="form-control" id="inputEmail" required>
 			</div>
 			<div class="mb-3">
 				<label for="inputPass" class="form-label">Mot de passe</label>
-				<input type="password" class="form-control" id="inputPass">
+				<input type="password" class="form-control" id="inputPass" required>
 			</div>
 			<button type="submit" class="btn btn-success">Connexion</button>
+			<div class="mb-1 mt-3 p-2 alert alert-warning d-none" id="loginError" role="alert"></div>
 		</form>
-		<div class="mb-1 mt-3 p-2 alert alert-warning d-none" id="loginError" role="alert"></div>
 	</div>
 	<script>
 		$("form").on("submit", (ev) => {
@@ -24,7 +24,7 @@
 					password: $("#inputPass").val(),
 				},
 				(res) => {
-					location.replace("/");
+					location.assign("/");
 				},
 				(err) => {
 					$("#loginError").removeClass("d-none").text(err.message);

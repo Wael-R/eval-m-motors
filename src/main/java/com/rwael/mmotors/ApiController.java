@@ -7,11 +7,13 @@ import com.rwael.mmotors.Database.UserRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolationException;
 import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,7 +45,7 @@ public class ApiController
 	}
 
 	@PostMapping("/signup")
-	public String postSignup(@RequestBody SignupData entity)
+	public String postSignup(@RequestBody SignupData entity, HttpServletResponse response)
 	{
 		System.out.println("SIGNUP: " + entity);
 
@@ -52,7 +54,10 @@ public class ApiController
 		if(other == null)
 		{
 			if(entity.password().length() < 6)
+			{
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return mapper.writeValueAsString(new SignupResult(false, "Le mot de passe doit contenir au moins 6 caractères"));
+			}
 
 			User u = new User();
 
@@ -61,12 +66,25 @@ public class ApiController
 			u.setFirstName(entity.firstName());
 			u.setLastName(entity.lastName());
 
-			users.save(u);
+			try {
+				users.save(u);
+			} catch(TransactionSystemException e) {
+				String message = "Erreur lors de l'inscription";
+
+				if(e.getRootCause() instanceof ConstraintViolationException ex)
+					message = ex.getConstraintViolations().iterator().next().getMessage();
+
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return mapper.writeValueAsString(new SignupResult(false, message));
+			}
 
 			return mapper.writeValueAsString(new SignupResult(true, ""));
 		}
 		else
+		{
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			return mapper.writeValueAsString(new SignupResult(false, "Adresse e-mail déjà prise"));
+		}
 	}
 
 	@GetMapping("/logout")
