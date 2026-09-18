@@ -27,12 +27,16 @@ public class User implements UserDetails
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer id;
 
-	@Email
-	@NotBlank private String email;
-	@NotBlank private String password;
+	@Email(message = "Adresse e-mail invalide")
+	@NotBlank(message = "L'adresse e-mail est obligatoire")
+	private String email;
+	@NotBlank
+	private String password;
 
-	@NotBlank private String firstName;
-	@NotBlank private String lastName;
+	@NotBlank(message = "Le nom est obligatoire")
+	private String firstName;
+	@NotBlank(message = "Le nom est obligatoire")
+	private String lastName;
 
 	private boolean isAdministrator;
 
