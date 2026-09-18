@@ -14,17 +14,17 @@ interface UserRepositoryEx
 
 class UserRepositoryImpl implements UserRepositoryEx
 {
-	private final EntityManager mgr;
+	private final EntityManager manager;
 
 	public UserRepositoryImpl(EntityManager manager)
 	{
-		mgr = manager;
+		this.manager = manager;
 	}
 
 	@Override
 	public User findByEmail(String email)
 	{
-		TypedQuery<User> query = mgr.createQuery("SELECT DISTINCT u FROM User u WHERE u.email = :email", User.class);
+		TypedQuery<User> query = manager.createQuery("SELECT DISTINCT u FROM User u WHERE u.email = :email", User.class);
 		query.setParameter("email", email);
 		return query.getSingleResultOrNull();
 	}

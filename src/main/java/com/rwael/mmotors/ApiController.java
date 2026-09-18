@@ -36,10 +36,10 @@ public class ApiController
 	private final PasswordEncoder encoder;
 	private final UserRepository users;
 
-	public ApiController(PasswordEncoder enc, UserRepository userRepo)
+	public ApiController(PasswordEncoder encoder, UserRepository users)
 	{
-		encoder = enc;
-		users = userRepo;
+		this.encoder = encoder;
+		this.users = users;
 	}
 
 	@PostMapping("/signup")

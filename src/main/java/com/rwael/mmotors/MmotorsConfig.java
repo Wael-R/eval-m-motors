@@ -52,9 +52,9 @@ class WebSecurityConfig
 {
 	private final UserRepository users;
 
-	public WebSecurityConfig(UserRepository repo)
+	public WebSecurityConfig(UserRepository users)
 	{
-		users = repo;
+		this.users = users;
 	}
 
 	@Bean
@@ -169,9 +169,9 @@ class UserAuthFailHandler implements AuthenticationFailureHandler
 {
 	private final UserRepository users;
 
-	public UserAuthFailHandler(UserRepository repo)
+	public UserAuthFailHandler(UserRepository users)
 	{
-		users = repo;
+		this.users = users;
 	}
 
 	@Override
