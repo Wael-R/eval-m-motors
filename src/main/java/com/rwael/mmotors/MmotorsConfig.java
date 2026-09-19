@@ -140,9 +140,6 @@ class UserAuthFilter extends UsernamePasswordAuthenticationFilter
 
 			var auth = getAuthenticationManager().authenticate(token);
 
-			System.out.println("auth status: " + auth.isAuthenticated());
-			System.out.println("authorities: " + auth.getAuthorities());
-
 			return auth;
 		}
 		catch(IOException e)
@@ -159,7 +156,6 @@ class UserAuthSuccessHandler implements AuthenticationSuccessHandler
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException
 	{
-		System.out.println("AUTHED: " + authentication.toString());
 		response.setStatus(HttpServletResponse.SC_OK);
 		new ObjectMapper().writeValue(response.getWriter(), new LoginResult(true, ""));
 	}
@@ -177,7 +173,6 @@ class UserAuthFailHandler implements AuthenticationFailureHandler
 	@Override
 	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException
 	{
-		System.out.println("AUTH FAILED: " + exception);
 		String reason = "Erreur lors de la connexion";
 
 		if(exception instanceof BadCredentialsException)
@@ -187,8 +182,6 @@ class UserAuthFailHandler implements AuthenticationFailureHandler
 			else
 				reason = "Mot de passe incorrecte";
 		}
-
-		System.out.println(users.findByEmail(exception.getAuthenticationRequest().getName()));
 
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		new ObjectMapper().writeValue(response.getWriter(), new LoginResult(false, reason));
