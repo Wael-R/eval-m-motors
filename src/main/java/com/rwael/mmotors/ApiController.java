@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
 import tools.jackson.databind.ObjectMapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -34,6 +36,7 @@ public class ApiController
 {
 	private final ObjectMapper mapper = new ObjectMapper();
 	private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+	private final Logger logger = LoggerFactory.getLogger(ApiController.class);
 
 	private final PasswordEncoder encoder;
 	private final UserRepository users;
@@ -47,8 +50,6 @@ public class ApiController
 	@PostMapping("/signup")
 	public String postSignup(@RequestBody SignupData entity, HttpServletResponse response)
 	{
-		System.out.println("SIGNUP: " + entity);
-
 		User other = users.findByEmail(entity.email());
 
 		if(other == null)
@@ -77,6 +78,8 @@ public class ApiController
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return mapper.writeValueAsString(new SignupResult(false, message));
 			}
+
+			logger.info("New account signed up: account id " + u.getId());
 
 			return mapper.writeValueAsString(new SignupResult(true, ""));
 		}
