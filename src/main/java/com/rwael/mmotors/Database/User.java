@@ -11,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -20,7 +21,8 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
-@ToString 
+@ToString
+@Table(name = "users")
 public class User implements UserDetails
 {
 	@Id 
@@ -49,7 +51,7 @@ public class User implements UserDetails
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		ArrayList<GrantedAuthority> roles = new ArrayList<>();
 		roles.add(new Role("USER"));
-		
+
 		if(isAdministrator)
 			roles.add(new Role("ADMIN"));
 
