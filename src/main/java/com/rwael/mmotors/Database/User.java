@@ -3,8 +3,8 @@ package com.rwael.mmotors.Database;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Entity;
@@ -50,27 +50,11 @@ public class User implements UserDetails
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		ArrayList<GrantedAuthority> roles = new ArrayList<>();
-		roles.add(new Role("USER"));
+		roles.add(new SimpleGrantedAuthority("ROLE_USER"));
 
 		if(isAdministrator)
-			roles.add(new Role("ADMIN"));
+			roles.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
 
 		return roles;
-	}
-}
-
-class Role implements GrantedAuthority
-{
-	@Getter @Setter
-	private String role;
-
-	public Role(String role)
-	{
-		this.role = role;
-	}
-
-	@Override
-	public @Nullable String getAuthority() {
-		return role;
 	}
 }
