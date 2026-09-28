@@ -5,24 +5,14 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
-public class HomeController
+public class HomeController extends ControllerBase
 {
 	private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
-
-	@ModelAttribute
-	public void isLoggedIn(Model model, Authentication auth)
-	{
-		if(auth != null)
-			model.addAttribute("loggedIn", auth.isAuthenticated());
-		else
-			model.addAttribute("loggedIn", false);
-	}
 
 	@GetMapping("/")
 	public String getIndex(Model model)

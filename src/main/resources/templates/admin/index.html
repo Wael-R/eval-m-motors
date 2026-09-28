@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html th:replace="~{base::layout(~{::main}, 'Administrateur')}">
+<main>
+	<h2>Espace Administrateur</h2>
+
+	<h4>Véhicules</h4>
+
+	<div>
+		<div th:each="vehicle : ${vehicles}" class="row">
+			<div class="col-1" th:text="${vehicle.id}"></div>
+			<div class="col-3" th:text="${vehicle.brand}"></div>
+			<div class="col-8" th:text="${vehicle.model}"></div>
+		</div>
+	</div>
+
+	<!-- TODO: vehicle search -->
+	<!-- TODO: vehicle list cards -->
+	<!-- TODO: pages -->
+
+	<a href="/admin/new-vehicle" class="btn btn-success">Nouveau véhicule</a>
+</main>
+</html>
