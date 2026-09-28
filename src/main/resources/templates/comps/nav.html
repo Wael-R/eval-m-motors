@@ -24,7 +24,8 @@
 						Mon compte
 					</button>
 					<ul class="dropdown-menu">
-						<li><a href="/account" class="dropdown-item">Mon espace client</a></li>
+						<li><a href="/private/" class="dropdown-item">Mon espace client</a></li>
+						<li th:if="${isAdmin}"><a href="/admin/" class="dropdown-item">Mon espace administrateur</a></li>
 						<li><a href="/logout" class="dropdown-item">Déconnexion</a></li>
 					</ul>
 				</div>
