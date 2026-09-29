@@ -13,6 +13,7 @@ interface VehicleRepositoryEx
 {
 	List<Vehicle> findByBrand(String brand);
 	List<Vehicle> findByModel(String model);
+	Vehicle findByBrandAndModel(String brand, String model);
 }
 
 class VehicleRepositoryImpl implements VehicleRepositoryEx
@@ -38,5 +39,14 @@ class VehicleRepositoryImpl implements VehicleRepositoryEx
 		TypedQuery<Vehicle> query = manager.createQuery("SELECT DISTINCT v FROM Vehicle v WHERE v.model = :model", Vehicle.class);
 		query.setParameter("model", model);
 		return query.getResultList();
+	}
+
+	@Override
+	public Vehicle findByBrandAndModel(String brand, String model)
+	{
+		TypedQuery<Vehicle> query = manager.createQuery("SELECT DISTINCT v FROM Vehicle v WHERE v.brand = :brand AND v.model = :model", Vehicle.class);
+		query.setParameter("brand", brand);
+		query.setParameter("model", model);
+		return query.getSingleResultOrNull();
 	}
 }
