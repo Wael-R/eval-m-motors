@@ -8,7 +8,6 @@ import com.rwael.mmotors.Database.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
-import tools.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +27,10 @@ record SignupData(
 	String lastName
 ) {}
 
-record SignupResult(boolean success, String message) {}
-
 @RestController
 @RequestMapping("/api")
 public class ApiController
 {
-	private final ObjectMapper mapper = new ObjectMapper();
 	private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
 	private final Logger logger = LoggerFactory.getLogger(ApiController.class);
 
@@ -48,7 +44,7 @@ public class ApiController
 	}
 
 	@PostMapping("/signup")
-	public String postSignup(@RequestBody SignupData entity, HttpServletResponse response)
+	public ApiResult postSignup(@RequestBody SignupData entity, HttpServletResponse response)
 	{
 		User other = users.findByEmail(entity.email());
 
@@ -57,7 +53,7 @@ public class ApiController
 			if(entity.password().length() < 6)
 			{
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				return mapper.writeValueAsString(new SignupResult(false, "Le mot de passe doit contenir au moins 6 caractères"));
+				return new ApiResult(false, "Le mot de passe doit contenir au moins 6 caractères");
 			}
 
 			User u = new User();
@@ -76,17 +72,17 @@ public class ApiController
 					message = ex.getConstraintViolations().iterator().next().getMessage();
 
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				return mapper.writeValueAsString(new SignupResult(false, message));
+				return new ApiResult(false, message);
 			}
 
 			logger.info("New account signed up: account id " + u.getId());
 
-			return mapper.writeValueAsString(new SignupResult(true, ""));
+			return new ApiResult(true, "");
 		}
 		else
 		{
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			return mapper.writeValueAsString(new SignupResult(false, "Adresse e-mail déjà prise"));
+			return new ApiResult(false, "Adresse e-mail déjà prise");
 		}
 	}
 
