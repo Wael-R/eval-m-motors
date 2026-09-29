@@ -24,4 +24,10 @@ public class AdminController extends ControllerBase
 		model.addAttribute("vehicles", vehicles.findAll());
 		return "admin/index";
 	}
+
+	@GetMapping("/add-vehicle")
+	public String getAddVehicle(Model model)
+	{
+		return "admin/add-vehicle";
+	}
 }
