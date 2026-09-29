@@ -1,11 +1,16 @@
 package com.rwael.mmotors.Database;
 
+import org.hibernate.validator.constraints.Length;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,7 +19,11 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Table(name = "vehicles")
+@Table(
+	name = "vehicles",
+	uniqueConstraints = {
+		@UniqueConstraint(columnNames = {"brand", "model"})
+	})
 public class Vehicle
 {
 	@Id 
@@ -27,7 +36,11 @@ public class Vehicle
 	@NotBlank(message = "Le modèle est obligatoire")
 	private String model;
 
+	@NotNull
+	@Length(max = 1000)
 	private String description;
 
-	private boolean isAvailable;
+	@NotNull
+	@PositiveOrZero 
+	private Integer availability;
 }
