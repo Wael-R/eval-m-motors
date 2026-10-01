@@ -91,4 +91,16 @@ public class ApiAdminController
 
 		return ApiResult.Get(true, "", response);
 	}
+
+	@PostMapping("/delete-vehicle")
+	public ApiResult postDeleteVehicle(@RequestBody VehicleData entity, HttpServletResponse response)
+	{
+		Vehicle v = vehicles.findById(entity.id()).orElse(null);
+
+		if(v == null)
+			return ApiResult.Get(false, "Aucun véhicule avec cet identifiant", response);
+
+		vehicles.delete(v);
+		return ApiResult.Get(true, "", response);
+	}
 }

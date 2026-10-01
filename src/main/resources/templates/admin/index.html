@@ -6,12 +6,34 @@
 	<h4>Véhicules</h4>
 
 	<div>
-		<div th:each="vehicle : ${vehicles}" class="row">
+		<div th:each="vehicle : ${vehicles}" th:id="${'vehicleRow' + vehicle.id}" class="row">
 			<div class="col-1" th:text="${vehicle.id}"></div>
 			<div class="col-3" th:text="${vehicle.brand}"></div>
-			<div class="col-7" th:text="${vehicle.model}"></div>
-			<div class="col-1"><a th:href="'/admin/edit-vehicle/' + ${vehicle.id}" class="btn btn-sm btn-success">Modifier</a></div>
+			<div class="col-5" th:text="${vehicle.model}"></div>
+			<div class="col-3">
+				<a th:href="'/admin/edit-vehicle/' + ${vehicle.id}" class="btn btn-sm btn-success">Modifier</a>
+				<button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" th:attr="data-bs-target=${'#deleteModal' + vehicle.id}">Supprimer</button>
+			</div>
+
+			<div class="modal fade" th:id="${'deleteModal' + vehicle.id}" tabindex="-1" th:attr="aria-labelledby=${'deleteModalTitle' + vehicle.id}" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h1 class="modal-title fs-5" th:id="${'deleteModalTitle' + vehicle.id}">Suppression du véhicule: [[${vehicle.brand} + ' ' + ${vehicle.model}]]</h1>
+						</div>
+						<div class="modal-body">
+							<p>Êtes-vous sûr de vouloir supprimer ce véhicule ?</p>
+							<p><strong>Cette action est irréversible !</strong></p>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+							<button type="button" class="btn btn-danger" data-bs-dismiss="modal" th:attr="data-delete-id=${vehicle.id}">Supprimer</button>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
+		<div class="mb-1 mt-3 p-2 alert alert-warning d-none" id="error" role="alert"></div>
 	</div>
 
 	<!-- TODO: vehicle search -->
@@ -19,5 +41,27 @@
 	<!-- TODO: pages -->
 
 	<a href="/admin/add-vehicle" class="btn btn-success">Nouveau véhicule</a>
+	
+	<script>
+		const btn = $("[data-delete-id]");
+
+		btn.on("click", (ev) => {
+			const id = ev.target.getAttribute("data-delete-id");
+
+			jsonRequest("/api/admin/delete-vehicle", "POST", {
+					id: id
+				}, 
+				(res) => {
+					if(!$("#error").hasClass("d-none"))
+						$("#error").addClass("d-none");
+
+					$("#vehicleRow" + id).remove();
+				},
+				(err) => {
+					$("#error").removeClass("d-none").text(err.message);
+				}
+			);
+		});
+	</script>
 </main>
 </html>
