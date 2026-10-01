@@ -9,7 +9,8 @@
 		<div th:each="vehicle : ${vehicles}" class="row">
 			<div class="col-1" th:text="${vehicle.id}"></div>
 			<div class="col-3" th:text="${vehicle.brand}"></div>
-			<div class="col-8" th:text="${vehicle.model}"></div>
+			<div class="col-7" th:text="${vehicle.model}"></div>
+			<div class="col-1"><a th:href="'/admin/edit-vehicle/' + ${vehicle.id}" class="btn btn-sm btn-success">Modifier</a></div>
 		</div>
 	</div>
 
