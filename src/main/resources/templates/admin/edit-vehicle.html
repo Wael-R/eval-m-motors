@@ -19,6 +19,11 @@
 			</div>
 		</div>
 		<div class="mb-3">
+			<label for="inputImage" class="form-label">Image</label>
+			<input type="file" class="form-control" id="inputImage" accept=".png,.jpeg,.jpg" multiple>
+			<!-- todo? multiple image support -->
+		</div>
+		<div class="mb-3">
 			<label for="inputDesc" class="form-label">Description</label>
 			<textarea class="form-control" id="inputDesc"></textarea>
 		</div>
@@ -28,7 +33,12 @@
 
 	<script>
 		const btn = $("#submit");
+		let files = [];
 		let ready = false;
+
+		$("#inputImage").on("change", (ev) => {
+			files = ev.currentTarget.files;
+		});
 
 		jsonRequest("/api/vehicles/details/[[${vehicleId}]]", "GET", null, 
 			(res) => {
@@ -59,7 +69,19 @@
 					availability: $("#inputAvailable").val(),
 				},
 				(res) => {
-					location.assign("/admin/");
+					fileRequest("/api/admin/add-vehicle-thumbs", "POST", files, {id: "[[${vehicleId}]]"},
+						(res) => {
+							console.log(res);
+						},
+						(err) => {
+							console.error(err);
+						},
+						(curr, total) => {
+							console.log(`progress: ${curr}/${total} (${Math.round(curr/total * 100)}%)`);
+						}
+					)
+
+					// location.assign("/admin/");
 				},
 				(err) => {
 					$("#error").removeClass("d-none").text(err.message);

@@ -1,13 +1,18 @@
 package com.rwael.mmotors;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.rwael.mmotors.Database.FileService;
 import com.rwael.mmotors.Database.Vehicle;
 import com.rwael.mmotors.Database.VehicleRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
+
+import java.io.IOException;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
@@ -26,10 +31,12 @@ record VehicleData(
 @RequestMapping("/api/admin")
 public class ApiAdminController
 {
+	private final FileService files;
 	private final VehicleRepository vehicles;
 
-	public ApiAdminController(VehicleRepository vehicles)
+	public ApiAdminController(FileService files, VehicleRepository vehicles)
 	{
+		this.files = files;
 		this.vehicles = vehicles;
 	}
 
@@ -101,6 +108,31 @@ public class ApiAdminController
 			return ApiResult.Get(false, "Aucun véhicule avec cet identifiant", response);
 
 		vehicles.delete(v);
+		return ApiResult.Get(true, "", response);
+	}
+
+	@PostMapping("/add-vehicle-thumbs")
+	public ApiResult postDeleteVehicle(@RequestParam MultipartFile[] files, @RequestParam Integer id, HttpServletResponse response)
+	{
+		// TODO: check if the vehicle exists
+		// TODO: error if files arent image/png or image/jpg
+
+		for(MultipartFile file : files)
+		{
+			try
+			{
+				String name = file.getOriginalFilename();
+
+				this.files.getReference(file.getBytes(), name.substring(name.lastIndexOf('.') + 1));
+
+				// TODO: link these to a vehicle
+			}
+			catch(IOException e)
+			{
+				return ApiResult.Get(false, "Erreur lors de la sauvegarde des fichiers", response);
+			}
+		}
+
 		return ApiResult.Get(true, "", response);
 	}
 }
