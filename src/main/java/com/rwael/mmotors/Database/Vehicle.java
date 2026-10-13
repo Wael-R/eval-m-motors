@@ -41,6 +41,6 @@ public class Vehicle
 	private String description;
 
 	@NotNull
-	@PositiveOrZero 
+	@PositiveOrZero(message = "La disponibilité doit être supérieure ou égale à 0")
 	private Integer availability;
 }
