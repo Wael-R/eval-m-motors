@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
@@ -48,6 +49,7 @@ public class File
 	private boolean secure;
 
 	@Basic(fetch = FetchType.LAZY)
+	@OneToOne
 	private User owner;
 
 	public void setContent(byte[] content)
