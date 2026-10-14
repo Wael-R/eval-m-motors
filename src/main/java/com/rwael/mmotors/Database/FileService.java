@@ -17,10 +17,10 @@ public class FileService {
 	{
 		File f = files.findByHash(file.getHash());
 		if(f == null)
-			files.save(file);
+			f = files.save(file);
 
 		FileReference ref = new FileReference();
-		ref.setFile(file);
+		ref.setFile(f);
 
 		refs.save(ref);
 
@@ -34,11 +34,6 @@ public class FileService {
 		f.setExtension(ext);
 
 		return getReference(f);
-	}
-
-	public FileReference getReference(Integer id) // TODO? remove this (testing)
-	{
-		return refs.findById(id).get();
 	}
 
 	public void dropReference(FileReference ref)
