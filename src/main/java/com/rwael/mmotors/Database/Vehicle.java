@@ -1,11 +1,15 @@
 package com.rwael.mmotors.Database;
 
+import java.util.List;
+
 import org.hibernate.validator.constraints.Length;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
@@ -43,4 +47,7 @@ public class Vehicle
 	@NotNull
 	@PositiveOrZero(message = "La disponibilité doit être supérieure ou égale à 0")
 	private Integer availability;
+
+	@OneToMany(fetch = FetchType.LAZY)
+	private List<FileReference> thumbs;
 }
