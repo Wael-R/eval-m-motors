@@ -17,6 +17,7 @@ public interface FileRepository extends CrudRepository<File, Integer>, FileRepos
 
 interface FileRepositoryEx
 {
+	File findByFilename(String filename);
 	File findByContents(byte[] contents);
 }
 
@@ -27,6 +28,20 @@ class FileRepositoryImpl implements FileRepositoryEx
 	public FileRepositoryImpl(EntityManager manager)
 	{
 		this.manager = manager;
+	}
+
+	@Override
+	public File findByFilename(String filename)
+	{
+		Integer dot = filename.lastIndexOf('.');
+
+		String hash = filename.substring(0, dot);
+		String ext = filename.substring(dot + 1);
+
+		TypedQuery<File> query = manager.createQuery("SELECT DISTINCT f FROM File f WHERE f.hash = :hash AND f.extension = :ext", File.class);
+		query.setParameter("hash", hash);
+		query.setParameter("ext", ext);
+		return query.getSingleResultOrNull();
 	}
 
 	@Override
