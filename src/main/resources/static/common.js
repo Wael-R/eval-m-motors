@@ -94,3 +94,12 @@ function fileRequest(url, method, files, params, onSuccess, onError, onProgress,
 
 	return req;
 }
+
+function displayAlert(success, message, div)
+{
+	div.toggleClass("alert-warning", !success);
+	div.toggleClass("alert-success", success);
+
+	div.toggleClass("d-none", message.length <= 0);
+	div.text(message);
+}

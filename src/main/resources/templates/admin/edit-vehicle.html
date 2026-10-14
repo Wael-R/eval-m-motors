@@ -19,9 +19,21 @@
 			</div>
 		</div>
 		<div class="mb-3">
-			<label for="inputImage" class="form-label">Image</label>
+			<label for="inputImage" class="form-label">Images</label>
 			<input type="file" class="form-control" id="inputImage" accept=".png,.jpeg,.jpg" multiple>
-			<!-- todo? multiple image support -->
+			<div class="card mt-3 p-2">
+				<span id="imagesEmpty">Aucune image associée à ce véhicule</span>
+				<div class="row gx-2 d-none" id="imagesDiv">
+					<div class="col-2" id="thumb">
+						<div class="card">
+							<img src="" class="card-img-top" style="aspect-ratio: 16/9" data-thumb-img>
+							<div class="card-footer p-0">
+								<button type="button" class="btn btn-sm btn-danger col-12" data-thumb-delete>Supprimer</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="mb-3">
 			<label for="inputDesc" class="form-label">Description</label>
@@ -31,35 +43,83 @@
 		<div class="mb-1 mt-3 p-2 alert alert-warning d-none" id="error" role="alert"></div>
 	</form>
 
+	<!-- TODO: merge add-vehicle to avoid duplicate code -->
+
 	<script>
 		const btn = $("#submit");
 		let files = [];
 		let ready = false;
 
+		const thumbDiv = $("#thumb");
+		thumbDiv.detach();
+
 		$("#inputImage").on("change", (ev) => {
 			files = ev.currentTarget.files;
 		});
 
-		jsonRequest("/api/vehicles/details/[[${vehicleId}]]", "GET", null, 
-			(res) => {
-				ready = true;
-				btn.removeAttr("disabled");
+		function refreshForm()
+		{
+			$("#imagesDiv").children().remove();
 
-				$("#inputBrand").val(res.data.brand);
-				$("#inputModel").val(res.data.model);
-				$("#inputDesc").val(res.data.description);
-				$("#inputAvailable").val(res.data.availability);
-			},
-			(err) => {
-				$("#error").removeClass("d-none").text(err.message);
-			}
-		);
+			jsonRequest("/api/vehicles/details/[[${vehicleId}]]", "GET", null, 
+				(res) => {
+					ready = true;
+					btn.removeAttr("disabled");
+	
+					$("#inputBrand").val(res.data.brand);
+					$("#inputModel").val(res.data.model);
+					$("#inputDesc").val(res.data.description);
+					$("#inputAvailable").val(res.data.availability);
+
+					if(res.data.thumbs.length <= 0)
+					{
+						$("#imagesDiv").addClass("d-none");
+						$("#imagesEmpty").removeClass("d-none");
+					}
+					else
+					{
+						$("#imagesDiv").removeClass("d-none");
+						$("#imagesEmpty").addClass("d-none");
+
+						for(const file of res.data.thumbs)
+						{
+							const thumb = thumbDiv.clone();
+							$("#imagesDiv").append(thumb);
+
+							$("[data-thumb-img]", thumb).attr("src", file.path);
+							$("[data-thumb-delete]", thumb).on("click", (ev) => {
+								jsonRequest("/api/admin/delete-vehicle-thumbs", "POST", {
+										vehicleId: "[[${vehicleId}]]",
+										refId: file.id
+									},
+									(res) => {
+										displayAlert(true, "Image supprimée", $("#error"));
+										refreshForm();
+									},
+									(err) => {
+										displayAlert(false, err.message, $("#error"));
+									}
+								);
+							});
+						}
+					}
+				},
+				(err) => {
+					displayAlert(false, err.message, $("#error"));
+				}
+			);
+		}
+
+		refreshForm();
 
 		$("form").on("submit", (ev) => {
 			ev.preventDefault();
 
 			if(!ready)
 				return;
+
+			btn.attr("disabled", "");
+			ready = false;
 
 			jsonRequest("/api/admin/edit-vehicle", "POST", {
 					id: "[[${vehicleId}]]",
@@ -69,22 +129,31 @@
 					availability: $("#inputAvailable").val(),
 				},
 				(res) => {
-					fileRequest("/api/admin/add-vehicle-thumbs", "POST", files, {id: "[[${vehicleId}]]"},
-						(res) => {
-							console.log(res);
-						},
-						(err) => {
-							console.error(err);
-						},
-						(curr, total) => {
-							console.log(`progress: ${curr}/${total} (${Math.round(curr/total * 100)}%)`);
-						}
-					)
+					if(files.length > 0)
+					{
+						fileRequest("/api/admin/add-vehicle-thumbs", "POST", files, {id: "[[${vehicleId}]]"},
+							(res) => {
+								displayAlert(true, "Véhicule mis à jour avec succès", $("#error"));
+								refreshForm();
 
-					// location.assign("/admin/");
+								$("#inputImage").val("");
+							},
+							(err) => {
+								displayAlert(false, err.message, $("#error"));
+							},
+							(curr, total) => {
+								console.log(`progress: ${curr}/${total} (${Math.round(curr/total * 100)}%)`);
+							}
+						)
+					}
+					else
+					{
+						displayAlert(true, "Véhicule mis à jour avec succès", $("#error"));
+						refreshForm();
+					}
 				},
 				(err) => {
-					$("#error").removeClass("d-none").text(err.message);
+					displayAlert(false, err.message, $("#error"));
 				}
 			);
 		});
