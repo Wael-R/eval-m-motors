@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.rwael.mmotors.Database.FileReference;
 import com.rwael.mmotors.Database.FileService;
 import com.rwael.mmotors.Database.Vehicle;
 import com.rwael.mmotors.Database.VehicleRepository;
@@ -13,6 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
 
 import java.io.IOException;
+import java.net.FileNameMap;
+import java.net.URLConnection;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
@@ -25,6 +28,11 @@ record VehicleData(
 	String model,
 	String description,
 	Integer availability
+) {}
+
+record ThumbData(
+	Integer vehicleId,
+	Integer refId
 ) {}
 
 @RestController
@@ -112,10 +120,22 @@ public class ApiAdminController
 	}
 
 	@PostMapping("/add-vehicle-thumbs")
-	public ApiResult postDeleteVehicle(@RequestParam MultipartFile[] files, @RequestParam Integer id, HttpServletResponse response)
+	public ApiResult postAddVehicleThumbs(@RequestParam MultipartFile[] files, @RequestParam Integer id, HttpServletResponse response)
 	{
-		// TODO: check if the vehicle exists
-		// TODO: error if files arent image/png or image/jpg
+		FileNameMap map = URLConnection.getFileNameMap();
+
+		Vehicle v = vehicles.findById(id).orElse(null);
+
+		if(v == null)
+			return ApiResult.Get(false, "Aucun véhicule avec cet identifiant", response);
+
+		for(MultipartFile file : files)
+		{
+			String type = map.getContentTypeFor(file.getOriginalFilename());
+
+			if(!type.equals("image/png") && !type.equals("image/jpeg"))
+				return ApiResult.Get(false, "Les fichiers doivent être au format PNG, JPG ou JPEG", response);
+		}
 
 		for(MultipartFile file : files)
 		{
@@ -123,9 +143,9 @@ public class ApiAdminController
 			{
 				String name = file.getOriginalFilename();
 
-				this.files.getReference(file.getBytes(), name.substring(name.lastIndexOf('.') + 1));
+				v.getThumbs().add(this.files.getReference(file.getBytes(), name.substring(name.lastIndexOf('.') + 1)));
 
-				// TODO: link these to a vehicle
+				vehicles.save(v);
 			}
 			catch(IOException e)
 			{
@@ -134,5 +154,33 @@ public class ApiAdminController
 		}
 
 		return ApiResult.Get(true, "", response);
+	}
+
+	@PostMapping("/delete-vehicle-thumbs")
+	public ApiResult postDeleteVehicleThumbs(@RequestBody ThumbData thumb, HttpServletResponse response)
+	{
+		Vehicle v = vehicles.findById(thumb.vehicleId()).orElse(null);
+
+		if(v == null)
+			return ApiResult.Get(false, "Aucun véhicule avec cet identifiant", response);
+
+		boolean success = false;
+
+		for(FileReference ref : v.getThumbs())
+		{
+			if(ref.getId() == thumb.refId())
+			{
+				success = true;
+				v.getThumbs().remove(ref);
+				vehicles.save(v);
+				files.dropReference(ref);
+				break;
+			}
+		}
+
+		if(success)
+			return ApiResult.Get(true, "", response);
+		else
+			return ApiResult.Get(false, "Cette image n'existe pas", response);
 	}
 }
