@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.rwael.mmotors.Database.UserRepository;
 import com.rwael.mmotors.Database.VehicleRepository;
 
 @Controller
@@ -14,8 +15,9 @@ public class AdminController extends ControllerBase
 {
 	private final VehicleRepository vehicles;
 
-	public AdminController(VehicleRepository vehicles)
+	public AdminController(VehicleRepository vehicles, UserRepository user)
 	{
+		super(user);
 		this.vehicles = vehicles;
 	}
 
