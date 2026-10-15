@@ -21,9 +21,9 @@
 		<div class="mb-3">
 			<label for="inputImage" class="form-label">Images</label>
 			<input type="file" class="form-control" id="inputImage" accept=".png,.jpeg,.jpg" multiple>
-			<div class="card mt-3 p-2">
+			<div class="card mt-3 p-2 image-scroll">
 				<span id="imagesEmpty">Aucune image associée à ce véhicule</span>
-				<div class="row gx-2 d-none" id="imagesDiv">
+				<div class="row g-2 d-none" id="imagesDiv">
 					<div class="col-2" id="thumb">
 						<div class="card">
 							<img src="" class="card-img-top" style="aspect-ratio: 16/9" data-thumb-img>
@@ -44,6 +44,14 @@
 	</form>
 
 	<!-- TODO: merge add-vehicle to avoid duplicate code -->
+
+	<style>
+		.image-scroll
+		{
+			max-height: 250px;
+			overflow: auto;
+		}
+	</style>
 
 	<script>
 		const btn = $("#submit");
@@ -88,16 +96,18 @@
 
 							$("[data-thumb-img]", thumb).attr("src", file.path);
 							$("[data-thumb-delete]", thumb).on("click", (ev) => {
+								$("[data-thumb-delete]", thumb).attr("disabled", "");
 								jsonRequest("/api/admin/delete-vehicle-thumbs", "POST", {
 										vehicleId: "[[${vehicleId}]]",
 										refId: file.id
 									},
 									(res) => {
 										displayAlert(true, "Image supprimée", $("#error"));
-										refreshForm();
+										thumb.remove();
 									},
 									(err) => {
 										displayAlert(false, err.message, $("#error"));
+										$("[data-thumb-delete]", thumb).removeAttr("disabled");
 									}
 								);
 							});
@@ -119,7 +129,6 @@
 				return;
 
 			btn.attr("disabled", "");
-			ready = false;
 
 			jsonRequest("/api/admin/edit-vehicle", "POST", {
 					id: "[[${vehicleId}]]",
@@ -140,6 +149,7 @@
 							},
 							(err) => {
 								displayAlert(false, err.message, $("#error"));
+								btn.removeAttr("disabled");
 							},
 							(curr, total) => {
 								console.log(`progress: ${curr}/${total} (${Math.round(curr/total * 100)}%)`);
@@ -153,7 +163,9 @@
 					}
 				},
 				(err) => {
+					console.log(err);
 					displayAlert(false, err.message, $("#error"));
+					btn.removeAttr("disabled");
 				}
 			);
 		});
