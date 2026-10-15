@@ -168,7 +168,7 @@ public class ApiAdminController
 
 		for(FileReference ref : v.getThumbs())
 		{
-			if(ref.getId() == thumb.refId())
+			if(ref.getId().equals(thumb.refId()))
 			{
 				success = true;
 				v.getThumbs().remove(ref);
