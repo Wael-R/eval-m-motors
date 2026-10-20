@@ -17,12 +17,10 @@ public class FileService {
 	{
 		File f = files.findByHash(file.getHash());
 		if(f == null)
-			f = files.save(file);
+			f = file;
 
 		FileReference ref = new FileReference();
 		ref.setFile(f);
-
-		refs.save(ref);
 
 		return ref;
 	}
