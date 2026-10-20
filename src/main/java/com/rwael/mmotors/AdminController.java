@@ -29,14 +29,16 @@ public class AdminController extends ControllerBase
 	}
 
 	@GetMapping("/add-vehicle")
-	public String getAddVehicle()
+	public String getAddVehicle(Model model)
 	{
-		return "admin/add-vehicle";
+		model.addAttribute("edit", false);
+		return "admin/edit-vehicle";
 	}
 
 	@GetMapping("/edit-vehicle/{id}")
 	public String getEditVehicle(Model model, @PathVariable Integer id)
 	{
+		model.addAttribute("edit", true);
 		model.addAttribute("vehicleId", id);
 		return "admin/edit-vehicle";
 	}

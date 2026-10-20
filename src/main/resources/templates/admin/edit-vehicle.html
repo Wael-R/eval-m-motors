@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html th:replace="~{base::layout(~{::main}, 'Administrateur')}">
 <main>
-	<h2>Modification d'un véhicule</h2>
+	<h2>[[${edit ? "Modification d'un véhicule" : "Nouveau véhicule"}]]</h2>
 
 	<form>
 		<div class="mb-3 row">
@@ -21,7 +21,7 @@
 		<div class="mb-3">
 			<label for="inputImage" class="form-label">Images</label>
 			<input type="file" class="form-control" id="inputImage" accept=".png,.jpeg,.jpg" multiple>
-			<div class="card mt-3 p-2 image-scroll">
+			<div class="card mt-3 p-2 image-scroll" th:if="${edit}">
 				<span id="imagesEmpty">Aucune image associée à ce véhicule</span>
 				<div class="row g-2 d-none" id="imagesDiv">
 					<div class="col-2" id="thumb">
@@ -43,8 +43,6 @@
 		<div class="mb-1 mt-3 p-2 alert alert-warning d-none" id="error" role="alert"></div>
 	</form>
 
-	<!-- TODO: merge add-vehicle to avoid duplicate code -->
-
 	<style>
 		.image-scroll
 		{
@@ -53,8 +51,10 @@
 		}
 	</style>
 
-	<script>
+	<script th:inline="javascript">
+		const edit = /*[[${edit}]]*/ false;
 		const btn = $("#submit");
+		let vehicleId = /*[[${vehicleId}]]*/ null;
 		let files = [];
 		let ready = false;
 
@@ -67,6 +67,12 @@
 
 		function refreshForm()
 		{
+			if(!edit)
+			{
+				location.assign("/admin/");
+				return;
+			}
+
 			$("#imagesDiv").children().remove();
 
 			jsonRequest("/api/vehicles/details/[[${vehicleId}]]", "GET", null, 
@@ -98,12 +104,18 @@
 							$("[data-thumb-delete]", thumb).on("click", (ev) => {
 								$("[data-thumb-delete]", thumb).attr("disabled", "");
 								jsonRequest("/api/admin/delete-vehicle-thumbs", "POST", {
-										vehicleId: "[[${vehicleId}]]",
+										vehicleId: vehicleId,
 										refId: file.id
 									},
 									(res) => {
 										displayAlert(true, "Image supprimée", $("#error"));
 										thumb.remove();
+
+										if($("#imagesDiv").children().length <= 0)
+										{
+											$("#imagesDiv").addClass("d-none");
+											$("#imagesEmpty").removeClass("d-none");
+										}
 									},
 									(err) => {
 										displayAlert(false, err.message, $("#error"));
@@ -120,7 +132,13 @@
 			);
 		}
 
-		refreshForm();
+		if(edit)
+			refreshForm();
+		else
+		{
+			btn.removeAttr("disabled");
+			ready = true;
+		}
 
 		$("form").on("submit", (ev) => {
 			ev.preventDefault();
@@ -130,42 +148,25 @@
 
 			btn.attr("disabled", "");
 
-			jsonRequest("/api/admin/edit-vehicle", "POST", {
-					id: "[[${vehicleId}]]",
+			const req = formRequest(edit ? "/api/admin/edit-vehicle" : "/api/admin/add-vehicle", "POST", files, {
+					id: vehicleId,
 					brand: $("#inputBrand").val(),
 					model: $("#inputModel").val(),
 					description: $("#inputDesc").val(),
 					availability: $("#inputAvailable").val(),
 				},
 				(res) => {
-					if(files.length > 0)
-					{
-						fileRequest("/api/admin/add-vehicle-thumbs", "POST", files, {id: "[[${vehicleId}]]"},
-							(res) => {
-								displayAlert(true, "Véhicule mis à jour avec succès", $("#error"));
-								refreshForm();
-
-								$("#inputImage").val("");
-							},
-							(err) => {
-								displayAlert(false, err.message, $("#error"));
-								btn.removeAttr("disabled");
-							},
-							(curr, total) => {
-								console.log(`progress: ${curr}/${total} (${Math.round(curr/total * 100)}%)`);
-							}
-						)
-					}
-					else
-					{
-						displayAlert(true, "Véhicule mis à jour avec succès", $("#error"));
-						refreshForm();
-					}
+					displayAlert(true, "Véhicule mis à jour avec succès", $("#error"));
+					refreshForm();
+					$("#inputImage").val("");
 				},
 				(err) => {
 					console.log(err);
 					displayAlert(false, err.message, $("#error"));
 					btn.removeAttr("disabled");
+				},
+				(curr, total) => {
+					console.log(`progress: ${curr}/${total} (${Math.round(curr/total * 100)}%)`);
 				}
 			);
 		});

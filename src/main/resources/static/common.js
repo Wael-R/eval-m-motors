@@ -28,14 +28,8 @@ function jsonRequest(url, method, body, onSuccess, onError, asText = false)
 	});
 }
 
-function fileRequest(url, method, files, params, onSuccess, onError, onProgress, asText = false)
+function formRequest(url, method, files, params, onSuccess, onError, onProgress, asText = false)
 {
-	if(files.length <= 0)
-	{
-		console.error("Trying to upload 0 files");
-		return;
-	}
-
 	const csrfToken = $("meta[name='csrf']").attr("content");
 	const csrfHead = $("meta[name='csrf_head']").attr("content");
 
@@ -45,7 +39,10 @@ function fileRequest(url, method, files, params, onSuccess, onError, onProgress,
 		data.append(`files`, file);
 
 	for(const [k,v] of Object.entries(params))
-		data.append(k, v);
+	{
+		if(v != null && v != undefined)
+			data.append(k, v);
+	}
 
 	const req = new XMLHttpRequest();
 
@@ -75,17 +72,14 @@ function fileRequest(url, method, files, params, onSuccess, onError, onProgress,
 		}
 	};
 
-	req.onprogress = (ev) => {
+	req.upload.onprogress = (ev) => {
 		if(!onProgress)
 			return;
 
-		if(req.status >= 200 && req.status < 400)
-		{
-			if(ev.lengthComputable)
-				onProgress(ev.loaded, ev.total);
-			else
-				onProgress(0, 0);
-		}
+		if(ev.lengthComputable)
+			onProgress(ev.loaded, ev.total);
+		else
+			onProgress(0, 0);
 	}
 
 	req.open(method, url);
