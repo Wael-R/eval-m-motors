@@ -12,6 +12,7 @@ import com.rwael.mmotors.Database.VehicleRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 
 import java.io.IOException;
 import java.net.FileNameMap;
@@ -21,14 +22,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
-record VehicleData(
-	Integer id,
-	String brand,
-	String model,
-	String description,
-	Integer availability
-) {}
 
 record ThumbData(
 	Integer vehicleId,
@@ -48,49 +41,8 @@ public class ApiAdminController
 		this.vehicles = vehicles;
 	}
 
-	@PostMapping("/add-vehicle")
-	public ApiResult postAddVehicle(@RequestBody VehicleData entity, HttpServletResponse response)
+	ApiResult saveVehicle(Vehicle v, HttpServletResponse response)
 	{
-		Vehicle other = vehicles.findByBrandAndModel(entity.brand(), entity.model());
-
-		if(other == null)
-		{
-			Vehicle v = new Vehicle();
-			v.setModel(entity.model());
-			v.setBrand(entity.brand());
-			v.setDescription(entity.description());
-			v.setAvailability(entity.availability());
-
-			try {
-				vehicles.save(v);
-			} catch(TransactionSystemException e) {
-				String message = "Erreur lors de l'ajout du véhicule";
-
-				if(e.getRootCause() instanceof ConstraintViolationException ex)
-					message = ex.getConstraintViolations().iterator().next().getMessage();
-
-				return ApiResult.Get(false, message, response);
-			}
-
-			return ApiResult.Get(true, "", response);
-		}
-		else
-			return ApiResult.Get(false, "Un véhicule existe déjà avec la même marque et modèle", response);
-	}
-
-	@PostMapping("/edit-vehicle")
-	public ApiResult postEditVehicle(@RequestBody VehicleData entity, HttpServletResponse response)
-	{
-		Vehicle v = vehicles.findById(entity.id()).orElse(null);
-
-		if(v == null)
-			return ApiResult.Get(false, "Aucun véhicule avec cet identifiant", response);
-
-		if(entity.model() != null) v.setModel(entity.model());
-		if(entity.brand() != null) v.setBrand(entity.brand());
-		if(entity.description() != null) v.setDescription(entity.description());
-		if(entity.availability() != null) v.setAvailability(entity.availability());
-
 		try {
 			vehicles.save(v);
 		} catch(TransactionSystemException e) {
@@ -104,55 +56,92 @@ public class ApiAdminController
 			return ApiResult.Get(false, "Un véhicule existe déjà avec la même marque et modèle", response);
 		}
 
-		return ApiResult.Get(true, "", response);
+		return ApiResult.Get(true, "", v, response);
 	}
 
-	@PostMapping("/delete-vehicle")
-	public ApiResult postDeleteVehicle(@RequestBody VehicleData entity, HttpServletResponse response)
-	{
-		Vehicle v = vehicles.findById(entity.id()).orElse(null);
-
-		if(v == null)
-			return ApiResult.Get(false, "Aucun véhicule avec cet identifiant", response);
-
-		vehicles.delete(v);
-		return ApiResult.Get(true, "", response);
-	}
-
-	@PostMapping("/add-vehicle-thumbs")
-	public ApiResult postAddVehicleThumbs(@RequestParam MultipartFile[] files, @RequestParam Integer id, HttpServletResponse response)
+	String addVehicleThumbs(Vehicle v, MultipartFile[] upload)
 	{
 		FileNameMap map = URLConnection.getFileNameMap();
 
-		Vehicle v = vehicles.findById(id).orElse(null);
-
-		if(v == null)
-			return ApiResult.Get(false, "Aucun véhicule avec cet identifiant", response);
-
-		for(MultipartFile file : files)
+		for(MultipartFile file : upload)
 		{
 			String type = map.getContentTypeFor(file.getOriginalFilename());
 
 			if(!type.equals("image/png") && !type.equals("image/jpeg"))
-				return ApiResult.Get(false, "Les fichiers doivent être au format PNG, JPG ou JPEG", response);
+				return "Les fichiers doivent être au format PNG, JPG ou JPEG";
 		}
 
-		for(MultipartFile file : files)
+		for(MultipartFile file : upload)
 		{
 			try
 			{
 				String name = file.getOriginalFilename();
 
-				v.getThumbs().add(this.files.getReference(file.getBytes(), name.substring(name.lastIndexOf('.') + 1)));
-
-				vehicles.save(v);
+				v.getThumbs().add(files.getReference(file.getBytes(), name.substring(name.lastIndexOf('.') + 1)));
 			}
 			catch(IOException e)
 			{
-				return ApiResult.Get(false, "Erreur lors de la sauvegarde des fichiers", response);
+				return "Erreur lors de la sauvegarde des fichiers";
 			}
 		}
 
+		return null;
+	}
+
+	@PostMapping("/add-vehicle")
+	public ApiResult postAddVehicle(@Valid Vehicle entity, @RequestParam(name = "files", required = false) MultipartFile[] upload, HttpServletResponse response)
+	{
+		Vehicle other = vehicles.findByBrandAndModel(entity.getBrand(), entity.getModel());
+
+		if(other == null)
+		{
+			if(upload != null && upload.length > 0)
+			{
+				String res = addVehicleThumbs(entity, upload);
+
+				if(res != null)
+					return ApiResult.Get(false, res, response);
+			}
+
+			return saveVehicle(entity, response);
+		}
+		else
+			return ApiResult.Get(false, "Un véhicule existe déjà avec la même marque et modèle", response);
+	}
+
+	@PostMapping("/edit-vehicle")
+	public ApiResult postEditVehicle(@Valid Vehicle entity, @RequestParam(name = "files", required = false) MultipartFile[] upload, HttpServletResponse response)
+	{
+		Vehicle v = vehicles.findById(entity.getId()).orElse(null);
+
+		if(v == null)
+			return ApiResult.Get(false, "Aucun véhicule avec cet identifiant", response);
+
+		if(entity.getModel() != null) v.setModel(entity.getModel());
+		if(entity.getBrand() != null) v.setBrand(entity.getBrand());
+		if(entity.getDescription() != null) v.setDescription(entity.getDescription());
+		if(entity.getAvailability() != null) v.setAvailability(entity.getAvailability());
+
+		if(upload != null && upload.length > 0)
+		{
+			String res = addVehicleThumbs(v, upload);
+
+			if(res != null)
+				return ApiResult.Get(false, res, response);
+		}
+
+		return saveVehicle(v, response);
+	}
+
+	@PostMapping("/delete-vehicle")
+	public ApiResult postDeleteVehicle(@RequestBody Vehicle entity, HttpServletResponse response)
+	{
+		Vehicle v = vehicles.findById(entity.getId()).orElse(null);
+
+		if(v == null)
+			return ApiResult.Get(false, "Aucun véhicule avec cet identifiant", response);
+
+		vehicles.delete(v);
 		return ApiResult.Get(true, "", response);
 	}
 
