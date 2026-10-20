@@ -1,9 +1,11 @@
 package com.rwael.mmotors.Database;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -48,6 +50,6 @@ public class Vehicle
 	@PositiveOrZero(message = "La disponibilité doit être supérieure ou égale à 0")
 	private Integer availability;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	private List<FileReference> thumbs;
+	@OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+	private List<FileReference> thumbs = new ArrayList<>();
 }
