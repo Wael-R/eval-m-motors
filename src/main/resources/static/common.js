@@ -7,6 +7,7 @@ function xhr(url, method, data, params, onSuccess, onError, onProgress, onDownlo
 	const search = new URLSearchParams();
 
 	let body = new FormData();
+	let json = false;
 
 	if(data instanceof FileList || !data)
 	{
@@ -37,6 +38,7 @@ function xhr(url, method, data, params, onSuccess, onError, onProgress, onDownlo
 		}
 
 		body = JSON.stringify(data);
+		json = true;
 	}
 
 	req.onreadystatechange = (ev) => {
@@ -85,6 +87,8 @@ function xhr(url, method, data, params, onSuccess, onError, onProgress, onDownlo
 
 	req.open(method, url + (search.size > 0 ? "?" + search.toString() : ""));
 	req.setRequestHeader(csrfHead, csrfToken);
+	if(json)
+		req.setRequestHeader("Content-Type", "application/json");
 	req.send(body);
 
 	return req;
