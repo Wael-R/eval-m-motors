@@ -24,18 +24,24 @@ public class AdminController extends ControllerBase
 	@GetMapping("/")
 	public String getIndex(Model model)
 	{
-		model.addAttribute("vehicles", vehicles.findAll());
 		return "admin/index";
 	}
 
-	@GetMapping("/add-vehicle")
+	@GetMapping("/vehicles/")
+	public String getVehiclesIndex(Model model)
+	{
+		model.addAttribute("vehicles", vehicles.findAll());
+		return "admin/vehicles";
+	}
+
+	@GetMapping("/vehicles/add")
 	public String getAddVehicle(Model model)
 	{
 		model.addAttribute("edit", false);
 		return "admin/edit-vehicle";
 	}
 
-	@GetMapping("/edit-vehicle/{id}")
+	@GetMapping("/vehicles/edit/{id}")
 	public String getEditVehicle(Model model, @PathVariable Integer id)
 	{
 		model.addAttribute("edit", true);
