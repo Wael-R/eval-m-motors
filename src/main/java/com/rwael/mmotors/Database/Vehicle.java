@@ -43,7 +43,7 @@ public class Vehicle
 	private String model;
 
 	@NotNull
-	@Length(max = 1000)
+	@Length(max = 5000, message = "La description est limitée à 5000 caractères")
 	private String description;
 
 	@NotNull
