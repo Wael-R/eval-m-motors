@@ -55,7 +55,7 @@
 		const edit = /*[[${edit}]]*/ false;
 		const btn = $("#submit");
 		let vehicleId = /*[[${vehicleId}]]*/ null;
-		let files = [];
+		let files = null;
 		let ready = false;
 
 		const thumbDiv = $("#thumb");
@@ -75,17 +75,17 @@
 
 			$("#imagesDiv").children().remove();
 
-			jsonRequest("/api/vehicles/details/[[${vehicleId}]]", "GET", null, 
-				(res) => {
+			xhr("/api/vehicles/details/" + vehicleId, "GET", null, null,
+				onSuccess = (req, json) => {
 					ready = true;
 					btn.removeAttr("disabled");
 	
-					$("#inputBrand").val(res.data.brand);
-					$("#inputModel").val(res.data.model);
-					$("#inputDesc").val(res.data.description);
-					$("#inputAvailable").val(res.data.availability);
+					$("#inputBrand").val(json.data.brand);
+					$("#inputModel").val(json.data.model);
+					$("#inputDesc").val(json.data.description);
+					$("#inputAvailable").val(json.data.availability);
 
-					if(res.data.thumbs.length <= 0)
+					if(json.data.thumbs.length <= 0)
 					{
 						$("#imagesDiv").addClass("d-none");
 						$("#imagesEmpty").removeClass("d-none");
@@ -95,7 +95,7 @@
 						$("#imagesDiv").removeClass("d-none");
 						$("#imagesEmpty").addClass("d-none");
 
-						for(const file of res.data.thumbs)
+						for(const file of json.data.thumbs)
 						{
 							const thumb = thumbDiv.clone();
 							$("#imagesDiv").append(thumb);
@@ -103,11 +103,11 @@
 							$("[data-thumb-img]", thumb).attr("src", file.path);
 							$("[data-thumb-delete]", thumb).on("click", (ev) => {
 								$("[data-thumb-delete]", thumb).attr("disabled", "");
-								jsonRequest("/api/admin/delete-vehicle-thumbs", "POST", {
+								xhr("/api/admin/delete-vehicle-thumbs", "POST", {
 										vehicleId: vehicleId,
 										refId: file.id
-									},
-									(res) => {
+									}, null,
+									onSuccess = (req) => {
 										displayAlert(true, "Image supprimée", $("#error"));
 										thumb.remove();
 
@@ -117,7 +117,7 @@
 											$("#imagesEmpty").removeClass("d-none");
 										}
 									},
-									(err) => {
+									onError = (req) => {
 										displayAlert(false, err.message, $("#error"));
 										$("[data-thumb-delete]", thumb).removeAttr("disabled");
 									}
@@ -126,8 +126,8 @@
 						}
 					}
 				},
-				(err) => {
-					displayAlert(false, err.message, $("#error"));
+				onError = (req, json) => {
+					displayAlert(false, json?.message ?? req.responseText, $("#error"));
 				}
 			);
 		}
@@ -148,25 +148,25 @@
 
 			btn.attr("disabled", "");
 
-			const req = formRequest(edit ? "/api/admin/edit-vehicle" : "/api/admin/add-vehicle", "POST", files, {
+			const req = xhr(edit ? "/api/admin/edit-vehicle" : "/api/admin/add-vehicle", "POST", files, {
 					id: vehicleId,
 					brand: $("#inputBrand").val(),
 					model: $("#inputModel").val(),
 					description: $("#inputDesc").val(),
 					availability: $("#inputAvailable").val(),
 				},
-				(res) => {
+				onSuccess = (req) => {
 					displayAlert(true, "Véhicule mis à jour avec succès", $("#error"));
 					refreshForm();
 					$("#inputImage").val("");
 				},
-				(err) => {
-					console.log(err);
-					displayAlert(false, err.message, $("#error"));
+				onError = (req, json) => {
+					console.log(req.responseText);
+					displayAlert(false, json?.message ?? req.responseText, $("#error"));
 					btn.removeAttr("disabled");
 				},
-				(curr, total) => {
-					console.log(`progress: ${curr}/${total} (${Math.round(curr/total * 100)}%)`);
+				onProgress = (req, curr, total) => {
+					console.log(`upload: ${curr}/${total} (${Math.round(curr/total * 100)}%)`);
 				}
 			);
 		});

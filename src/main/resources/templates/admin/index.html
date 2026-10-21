@@ -48,17 +48,17 @@
 		btn.on("click", (ev) => {
 			const id = ev.target.getAttribute("data-delete-id");
 
-			jsonRequest("/api/admin/delete-vehicle", "POST", {
+			xhr("/api/admin/delete-vehicle", "POST", {
 					id: id
-				}, 
-				(res) => {
+				}, null,
+				onSuccess = (req) => {
 					if(!$("#error").hasClass("d-none"))
 						$("#error").addClass("d-none");
 
 					$("#vehicleRow" + id).remove();
 				},
-				(err) => {
-					$("#error").removeClass("d-none").text(err.message);
+				onError = (req, json) => {
+					$("#error").removeClass("d-none").text(json?.message ?? req.responseText);
 				}
 			);
 		});

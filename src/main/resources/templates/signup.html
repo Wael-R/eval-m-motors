@@ -41,17 +41,17 @@
 				return;
 			}
 
-			jsonRequest("/api/signup", "POST", {
+			xhr("/api/signup", "POST", {
 					email: $("#inputEmail").val(),
 					password: pass,
 					firstName: $("#inputFirstName").val(),
 					lastName: $("#inputLastName").val(),
-				},
-				(res) => {
+				}, null,
+				onSuccess = (req) => {
 					location.assign("/login");
 				},
-				(err) => {
-					$("#signupError").removeClass("d-none").text(err.message);
+				onError = (req, json) => {
+					$("#signupError").removeClass("d-none").text(json?.message ?? req.responseText);
 				}
 			);
 		});

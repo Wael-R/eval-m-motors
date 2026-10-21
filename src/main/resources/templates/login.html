@@ -19,15 +19,15 @@
 		$("form").on("submit", (ev) => {
 			ev.preventDefault();
 
-			jsonRequest("/api/login", "POST", {
+			xhr("/api/login", "POST", {
 					username: $("#inputEmail").val(),
 					password: $("#inputPass").val(),
-				},
-				(res) => {
+				}, null,
+				onSuccess = (req) => {
 					location.assign("/");
 				},
-				(err) => {
-					$("#loginError").removeClass("d-none").text(err.message);
+				onError = (req, json) => {
+					$("#loginError").removeClass("d-none").text(json?.message ?? req.responseText);
 				}
 			);
 		});
