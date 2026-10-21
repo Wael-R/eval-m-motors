@@ -1,4 +1,4 @@
-package com.rwael.mmotors;
+package com.rwael.mmotors.Controllers;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
