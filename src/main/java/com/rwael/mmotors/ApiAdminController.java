@@ -12,7 +12,6 @@ import com.rwael.mmotors.Database.VehicleRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Valid;
 
 import java.io.IOException;
 import java.net.FileNameMap;
@@ -89,7 +88,7 @@ public class ApiAdminController
 	}
 
 	@PostMapping("/add-vehicle")
-	public ApiResult postAddVehicle(@Valid Vehicle entity, @RequestParam(name = "files", required = false) MultipartFile[] upload, HttpServletResponse response)
+	public ApiResult postAddVehicle(Vehicle entity, @RequestParam(name = "files", required = false) MultipartFile[] upload, HttpServletResponse response)
 	{
 		Vehicle other = vehicles.findByBrandAndModel(entity.getBrand(), entity.getModel());
 
@@ -110,7 +109,7 @@ public class ApiAdminController
 	}
 
 	@PostMapping("/edit-vehicle")
-	public ApiResult postEditVehicle(@Valid Vehicle entity, @RequestParam(name = "files", required = false) MultipartFile[] upload, HttpServletResponse response)
+	public ApiResult postEditVehicle(Vehicle entity, @RequestParam(name = "files", required = false) MultipartFile[] upload, HttpServletResponse response)
 	{
 		Vehicle v = vehicles.findById(entity.getId()).orElse(null);
 
