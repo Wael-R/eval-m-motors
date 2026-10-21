@@ -29,13 +29,13 @@ record ThumbData(
 ) {}
 
 @RestController
-@RequestMapping("/api/admin")
-public class ApiAdminController
+@RequestMapping("/api/admin/vehicles")
+public class ApiAdminVehiclesController
 {
 	private final FileService files;
 	private final VehicleRepository vehicles;
 
-	public ApiAdminController(FileService files, VehicleRepository vehicles)
+	public ApiAdminVehiclesController(FileService files, VehicleRepository vehicles)
 	{
 		this.files = files;
 		this.vehicles = vehicles;
@@ -88,7 +88,7 @@ public class ApiAdminController
 		return null;
 	}
 
-	@PostMapping("/add-vehicle")
+	@PostMapping("/add")
 	public ApiResult postAddVehicle(Vehicle entity, @RequestParam(name = "files", required = false) MultipartFile[] upload, HttpServletResponse response)
 	{
 		Vehicle other = vehicles.findByBrandAndModel(entity.getBrand(), entity.getModel());
@@ -109,7 +109,7 @@ public class ApiAdminController
 			return ApiResult.Get(false, "Un véhicule existe déjà avec la même marque et modèle", response);
 	}
 
-	@PostMapping("/edit-vehicle")
+	@PostMapping("/edit")
 	public ApiResult postEditVehicle(Vehicle entity, @RequestParam(name = "files", required = false) MultipartFile[] upload, HttpServletResponse response)
 	{
 		Vehicle v = vehicles.findById(entity.getId()).orElse(null);
@@ -133,7 +133,7 @@ public class ApiAdminController
 		return saveVehicle(v, response);
 	}
 
-	@PostMapping("/delete-vehicle")
+	@PostMapping("/delete")
 	public ApiResult postDeleteVehicle(@RequestBody Vehicle entity, HttpServletResponse response)
 	{
 		Vehicle v = vehicles.findById(entity.getId()).orElse(null);
@@ -145,7 +145,7 @@ public class ApiAdminController
 		return ApiResult.Get(true, "", response);
 	}
 
-	@PostMapping("/delete-vehicle-thumbs")
+	@PostMapping("/delete-thumbs")
 	public ApiResult postDeleteVehicleThumbs(@RequestBody ThumbData thumb, HttpServletResponse response)
 	{
 		Vehicle v = vehicles.findById(thumb.vehicleId()).orElse(null);

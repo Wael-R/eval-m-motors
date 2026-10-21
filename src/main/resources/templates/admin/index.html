@@ -48,7 +48,7 @@
 		btn.on("click", (ev) => {
 			const id = ev.target.getAttribute("data-delete-id");
 
-			xhr("/api/admin/delete-vehicle", "POST", {
+			xhr("/api/admin/vehicles/delete", "POST", {
 					id: id
 				}, null,
 				onSuccess = (req) => {

@@ -103,7 +103,7 @@
 							$("[data-thumb-img]", thumb).attr("src", file.path);
 							$("[data-thumb-delete]", thumb).on("click", (ev) => {
 								$("[data-thumb-delete]", thumb).attr("disabled", "");
-								xhr("/api/admin/delete-vehicle-thumbs", "POST", {
+								xhr("/api/admin/vehicles/delete-thumbs", "POST", {
 										vehicleId: vehicleId,
 										refId: file.id
 									}, null,
@@ -148,7 +148,7 @@
 
 			btn.attr("disabled", "");
 
-			const req = xhr(edit ? "/api/admin/edit-vehicle" : "/api/admin/add-vehicle", "POST", files, {
+			const req = xhr(edit ? "/api/admin/vehicles/edit" : "/api/admin/vehicles/add", "POST", files, {
 					id: vehicleId,
 					brand: $("#inputBrand").val(),
 					model: $("#inputModel").val(),
