@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html th:replace="~{base::layout(~{::main}, 'Administrateur')}">
+<html th:replace="~{base::layout(~{::main}, 'Administrateur', ~{::script})}">
 <main>
 	<h2 class="mb-4">Véhicules</h2>
 
@@ -17,31 +17,32 @@
 							<a th:href="'/admin/vehicles/edit/' + ${vehicle.id}" class="w-100 btn btn-sm btn-success">Modifier</a>
 						</div>
 						<div class="col-12 col-lg-6">
-							<button type="button" class="w-100 btn btn-sm btn-danger" data-bs-toggle="modal" th:attr="data-bs-target=${'#deleteModal' + vehicle.id}">Supprimer</button>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="modal fade" th:id="${'deleteModal' + vehicle.id}" tabindex="-1" th:attr="aria-labelledby=${'deleteModalTitle' + vehicle.id}" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h1 class="modal-title fs-5" th:id="${'deleteModalTitle' + vehicle.id}">Suppression du véhicule: [[${vehicle.brand} + ' ' + ${vehicle.model}]]</h1>
-						</div>
-						<div class="modal-body">
-							<p>Êtes-vous sûr de vouloir supprimer ce véhicule ?</p>
-							<p><strong>Cette action est irréversible !</strong></p>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-							<button type="button" class="btn btn-danger" data-bs-dismiss="modal" th:attr="data-delete-id=${vehicle.id}">Supprimer</button>
+							<button type="button" class="w-100 btn btn-sm btn-danger" th:attr="data-delete-id=${vehicle.id}">Supprimer</button>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="mb-1 mt-3 p-2 alert alert-warning d-none" id="error" role="alert"></div>
+	</div>
+
+	<div class="mb-1 mt-3 p-2 alert alert-warning d-none" id="error" role="alert"></div>
+
+	<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="deleteModalTitle">Suppression du véhicule: </h1>
+				</div>
+				<div class="modal-body">
+					<p>Êtes-vous sûr de vouloir supprimer ce véhicule ?</p>
+					<p><strong>Cette action est irréversible !</strong></p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+					<button type="button" class="btn btn-danger" id="deleteModalConfirm" data-bs-dismiss="modal">Supprimer</button>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<!-- TODO: card images -->
@@ -49,27 +50,30 @@
 	<!-- TODO: pages -->
 
 	<a href="/admin/vehicles/add" class="btn btn-success">Nouveau véhicule</a>
-
-	<script>
-		const btn = $("[data-delete-id]");
-
-		btn.on("click", (ev) => {
-			const id = ev.target.getAttribute("data-delete-id");
-
-			xhr("/api/admin/vehicles/delete", "POST", {
-					id: id
-				}, null,
-				onSuccess = (req) => {
-					if(!$("#error").hasClass("d-none"))
-						$("#error").addClass("d-none");
-
-					$("#vehicleRow" + id).remove();
-				},
-				onError = (req, json) => {
-					$("#error").removeClass("d-none").text(json?.message ?? req.responseText);
-				}
-			);
-		});
-	</script>
 </main>
+<script>
+	const modal = new bootstrap.Modal("#deleteModal");
+	let currId = -1;
+
+	$("[data-delete-id]").on("click", (ev) => {
+		currId = ev.target.getAttribute("data-delete-id");
+		modal.show();
+	});
+
+	$("#deleteModalConfirm").on("click", (ev) => {
+		xhr("/api/admin/vehicles/delete", "POST", {
+				id: currId
+			}, null,
+			onSuccess = (req) => {
+				if(!$("#error").hasClass("d-none"))
+					$("#error").addClass("d-none");
+
+				$("#vehicleRow" + currId).remove();
+			},
+			onError = (req, json) => {
+				$("#error").removeClass("d-none").text(json?.message ?? req.responseText);
+			}
+		);
+	});
+</script>
 </html>
