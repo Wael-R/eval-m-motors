@@ -3,21 +3,23 @@
 <main>
 	<h2 class="mb-4">Véhicules</h2>
 
-	<div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mb-4">
-		<div th:each="vehicle : ${vehicles}" th:id="${'vehicleRow' + vehicle.id}" class="col" style="aspect-ratio: 5/6;">
+	<input class="form-control mb-3" type="text" id="vehicleFilter" placeholder="Filtrer...">
+
+	<div id="vehicleList" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mb-4">
+		<div id="vehicleCard" class="col" style="aspect-ratio: 5/6;">
 			<div class="card h-100">
-				<img src="#" class="card-img-top" style="aspect-ratio: 16/9;">
+				<img src="/missing.png" class="card-img-top object-fit-cover" style="aspect-ratio: 16/9;">
 				<div class="card-body overflow-hidden">
-					<h6 class="card-title" th:text="${vehicle.brand + ' ' + vehicle.model}"></h6>
-					<p class="card-text" th:text="${vehicle.description}"></p>
+					<h6 class="card-title"></h6>
+					<p class="card-text"></p>
 				</div>
 				<div class="card-footer p-1">
 					<div class="row g-1">
 						<div class="col-12 col-lg-6">
-							<a th:href="'/admin/vehicles/edit/' + ${vehicle.id}" class="w-100 btn btn-sm btn-success">Modifier</a>
+							<a class="w-100 btn btn-sm btn-success">Modifier</a>
 						</div>
 						<div class="col-12 col-lg-6">
-							<button type="button" class="w-100 btn btn-sm btn-danger" th:attr="data-delete-id=${vehicle.id}">Supprimer</button>
+							<button type="button" class="w-100 btn btn-sm btn-danger" data-delete>Supprimer</button>
 						</div>
 					</div>
 				</div>
@@ -25,7 +27,11 @@
 		</div>
 	</div>
 
+	<div th:replace="~{comps/page-nav}"></div>
+
 	<div class="mb-1 mt-3 p-2 alert alert-warning d-none" id="error" role="alert"></div>
+
+	<a href="/admin/vehicles/add" class="btn btn-success">Nouveau véhicule</a>
 
 	<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalTitle" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
@@ -44,31 +50,68 @@
 			</div>
 		</div>
 	</div>
-
-	<!-- TODO: card images -->
-	<!-- TODO: vehicle search -->
-	<!-- TODO: pages -->
-
-	<a href="/admin/vehicles/add" class="btn btn-success">Nouveau véhicule</a>
 </main>
 <script>
+	const card = $("#vehicleCard");
 	const modal = new bootstrap.Modal("#deleteModal");
-	let currId = -1;
+	let currVehicle = null;
+	let currCard = null;
+	let page = 0;
+	let query = "";
+	let numPages = 0;
+	const navState = {page: 0, numPages: 0};
 
-	$("[data-delete-id]").on("click", (ev) => {
-		currId = ev.target.getAttribute("data-delete-id");
-		modal.show();
+	card.detach();
+
+	function loadPage()
+	{
+		xhr("/api/vehicles/list", "GET", null, {page: page, query: query, size: 16},
+			onSuccess = (req, json) => {
+				$("#vehicleList").children().remove();
+
+				numPages = json.totalPages;
+
+				updatePageNav();
+
+				json.content.forEach((v, idx) => {
+					const c = card.clone();
+					$("img", c).attr("srcset", v.thumbs[0]?.path);
+					$("a", c).attr("href", `/admin/vehicles/edit/${v.id}`);
+					$(".card-title", c).text(`${v.brand} ${v.model}`);
+					$(".card-text", c).text(v.description.substr(0, 30));
+
+					$("[data-delete]", c).on("click", (ev) => {
+						currVehicle = v;
+						currCard = c;
+						modal.show();
+						$("#deleteModalTitle").text(`Suppression du véhicule : ${v.brand} ${v.model}`);
+					});
+
+					$("#vehicleList").append(c);
+				});
+			},
+			onError = (req, json) => {
+				$("#error").removeClass("d-none").text(json?.message ?? req.responseText);
+			}
+		)
+	}
+
+	loadPage();
+
+	$("#vehicleFilter").on("change", (ev) => {
+		query = ev.target.value;
+		loadPage();
 	});
 
 	$("#deleteModalConfirm").on("click", (ev) => {
 		xhr("/api/admin/vehicles/delete", "POST", {
-				id: currId
+				id: currVehicle.id
 			}, null,
 			onSuccess = (req) => {
 				if(!$("#error").hasClass("d-none"))
 					$("#error").addClass("d-none");
 
-				$("#vehicleRow" + currId).remove();
+				currCard.remove();
 			},
 			onError = (req, json) => {
 				$("#error").removeClass("d-none").text(json?.message ?? req.responseText);

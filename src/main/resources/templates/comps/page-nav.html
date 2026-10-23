@@ -1,0 +1,102 @@
+<div class="container text-center mb-3" id="pageNav">
+	<div class="mx-auto btn-group" role="group" aria-label="Pages">
+		<button type="button" class="btn btn-page-nav p-0 btn-success" id="pagePrev"><</button>
+		<button type="button" class="btn btn-page-nav p-0 btn-success" id="pageFirst">1</button>
+		<button type="button" class="btn btn-page-nav p-0 btn-outline-success" id="pagePrevGap" disabled>...</button>
+		<button type="button" class="btn btn-page-nav p-0 btn-outline-success" id="pageNextGap" disabled>...</button>
+		<button type="button" class="btn btn-page-nav p-0 btn-success" id="pageLast">2</button>
+		<button type="button" class="btn btn-page-nav p-0 btn-success" id="pageNext">></button>
+	</div>
+</div>
+<script>
+	const nav = $("#pageFirst").clone();
+	const navs = [];
+
+	nav.removeAttr("id");
+
+	$("#pagePrev").on("click", (ev) => {page = Math.max(0, page - 1); loadPage();});
+	$("#pageNext").on("click", (ev) => {page = Math.min(numPages - 1, page + 1); loadPage();});
+
+	$("#pageFirst").on("click", (ev) => {page = 0; loadPage();});
+	$("#pageLast").on("click", (ev) => {page = numPages - 1; loadPage();});
+
+	function updatePageNav()
+	{
+		if(numPages <= 1)
+		{
+			$("#pageNav").addClass("d-none");
+		}
+		else
+		{
+			$("#pageNav").removeClass("d-none");
+			const around = 3;
+			let start, end = 0;
+
+			if(page <= around)
+			{
+				start = 0;
+				end = around * 2 + 1;
+			}
+			else if(page >= numPages - around)
+			{
+				start = numPages - around * 2 - 1;
+				end = numPages;
+			}
+			else
+			{
+				start = page - around;
+				end = start + around * 2 + 1;
+			}
+
+			if(end > numPages)
+				end = numPages
+
+			navs.forEach((n) => {
+				n.remove();
+			});
+
+			for(let i = start; i < end; i++)
+			{
+				let root = false;
+				let n;
+
+				if(i == start)
+				{
+					n = $("#pageFirst");
+					n.text(1);
+					root = true;
+				}
+				else if(i == end - 1)
+				{
+					n = $("#pageLast");
+					n.text(numPages);
+					root = true;
+				}
+				else
+				{
+					n = nav.clone();
+					n.text(i + 1);
+					$("#pageNextGap").before(n);
+					navs.push(n);
+				}
+
+				n.toggleClass("btn-success", i != page);
+				n.toggleClass("btn-outline-success", i == page);
+
+				if(i == page)
+					n.attr("disabled", "");
+				else
+				{
+					if(!root)
+						n.on("click", (ev) => {page = i; loadPage();});
+
+					n.removeAttr("disabled");
+				}
+			}
+
+			$("#pagePrevGap").toggleClass("d-none", start <= 0);
+			$("#pageNextGap").toggleClass("d-none", end >= numPages);
+		}
+	}
+
+</script>

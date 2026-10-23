@@ -7,3 +7,10 @@
 {
 	background-color: #DDD;
 }
+
+.btn-page-nav
+{
+	height: 20pt;
+	font-size: 10pt;
+	aspect-ratio: 1;
+}

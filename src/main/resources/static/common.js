@@ -9,7 +9,7 @@ function xhr(url, method, data, params, onSuccess, onError, onProgress, onDownlo
 	let body = new FormData();
 	let json = false;
 
-	if(data instanceof FileList || !data)
+	if(method != "GET" && (data instanceof FileList || !data))
 	{
 		if(params)
 		{
@@ -26,7 +26,7 @@ function xhr(url, method, data, params, onSuccess, onError, onProgress, onDownlo
 				body.append(`files`, file);
 		}
 	}
-	else if(data)
+	else if(method == "GET" || data)
 	{
 		if(params)
 		{

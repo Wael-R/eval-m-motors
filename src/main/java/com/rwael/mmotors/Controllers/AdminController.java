@@ -30,7 +30,6 @@ public class AdminController extends ControllerBase
 	@GetMapping("/vehicles/")
 	public String getVehiclesIndex(Model model)
 	{
-		model.addAttribute("vehicles", vehicles.findAll());
 		return "admin/vehicles";
 	}
 
