@@ -121,7 +121,7 @@ public class ApiAdminVehiclesController
 		if(entity.getBrand() != null) v.setBrand(entity.getBrand());
 		if(entity.getDescription() != null) v.setDescription(entity.getDescription());
 		if(entity.getAvailability() != null) v.setAvailability(entity.getAvailability());
-		if(entity.getPrice() != null) v.setAvailability(entity.getPrice());
+		if(entity.getPrice() != null) v.setPrice(entity.getPrice());
 
 		if(upload != null && upload.length > 0)
 		{
