@@ -69,7 +69,7 @@
 			onSuccess = (req, json) => {
 				$("#vehicleList").children().remove();
 
-				numPages = json.totalPages;
+				numPages = json.page.totalPages;
 
 				updatePageNav();
 
