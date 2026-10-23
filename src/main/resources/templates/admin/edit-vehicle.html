@@ -27,7 +27,7 @@
 		<div class="mb-3">
 			<label for="inputImage" class="form-label">Images</label>
 			<input type="file" class="form-control" id="inputImage" accept=".png,.jpeg,.jpg" multiple>
-			<div class="card mt-3 p-2 image-scroll" th:if="${edit}">
+			<div class="card mt-3 p-2 overflow-auto" style="max-height: 256px;" th:if="${edit}">
 				<span id="imagesEmpty">Aucune image associée à ce véhicule</span>
 				<div class="row g-2 d-none" id="imagesDiv">
 					<div class="col-4 col-lg-2" id="thumb">
@@ -48,14 +48,6 @@
 		<button type="submit" class="btn btn-success" id="submit" disabled>Sauvegarder</button>
 		<div class="mb-1 mt-3 p-2 alert alert-warning d-none" id="error" role="alert"></div>
 	</form>
-
-	<style>
-		.image-scroll
-		{
-			max-height: 250px;
-			overflow: auto;
-		}
-	</style>
 
 	<script th:inline="javascript">
 		const edit = /*[[${edit}]]*/ false;
