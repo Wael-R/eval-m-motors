@@ -46,12 +46,17 @@
 			<textarea class="form-control" id="inputDesc"></textarea>
 		</div>
 		<button type="submit" class="btn btn-success" id="submit" disabled>Sauvegarder</button>
+		<div class="progress mb-1 mt-3 d-none" role="progressbar" id="progress">
+			<div class="progress-bar progress-bar-striped bg-success"></div>
+		</div>
 		<div class="mb-1 mt-3 p-2 alert alert-warning d-none" id="error" role="alert"></div>
 	</form>
 
 	<script th:inline="javascript">
 		const edit = /*[[${edit}]]*/ false;
 		const btn = $("#submit");
+		const progress = $("#progress");
+		const progressBar = $("#progress div");
 		let vehicleId = /*[[${vehicleId}]]*/ null;
 		let files = null;
 		let ready = false;
@@ -116,8 +121,8 @@
 											$("#imagesEmpty").removeClass("d-none");
 										}
 									},
-									onError = (req) => {
-										displayAlert(false, err.message, $("#error"));
+									onError = (req, json) => {
+										displayAlert(false, json?.message ?? req.responseText, $("#error"));
 										$("[data-thumb-delete]", thumb).removeAttr("disabled");
 									}
 								);
@@ -147,6 +152,9 @@
 
 			btn.attr("disabled", "");
 
+			progressBar.css("width", 0);
+			progress.removeClass("d-none");
+
 			const req = xhr(edit ? "/api/admin/vehicles/edit" : "/api/admin/vehicles/add", "POST", files, {
 					id: vehicleId,
 					brand: $("#inputBrand").val(),
@@ -159,13 +167,16 @@
 					displayAlert(true, "Véhicule mis à jour avec succès", $("#error"));
 					refreshForm();
 					$("#inputImage").val("");
+					progress.addClass("d-none");
 				},
 				onError = (req, json) => {
-					console.log(req.responseText);
 					displayAlert(false, json?.message ?? req.responseText, $("#error"));
 					btn.removeAttr("disabled");
+					progress.addClass("d-none");
 				},
 				onProgress = (req, curr, total) => {
+					displayAlert(true, "", $("#error"));
+					progressBar.css("width", `${(curr/total) * 100}%`);
 					console.log(`upload: ${curr}/${total} (${Math.round(curr/total * 100)}%)`);
 				}
 			);
