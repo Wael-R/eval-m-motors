@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,6 +46,10 @@ public class Vehicle
 	@NotNull
 	@Length(max = 5000, message = "La description est limitée à 5000 caractères")
 	private String description;
+
+	@NotNull
+	@Positive(message = "Le prix doit être supérieur à 0")
+	private Integer price;
 
 	@NotNull
 	@PositiveOrZero(message = "La disponibilité doit être supérieure ou égale à 0")

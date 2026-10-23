@@ -9,13 +9,19 @@
 				<label for="inputBrand" class="form-label">Marque</label>
 				<input type="text" class="form-control" id="inputBrand" required>
 			</div>
-			<div class="col-7">
+			<div class="col-9">
 				<label for="inputModel" class="form-label">Modèle</label>
 				<input type="text" class="form-control" id="inputModel" required>
 			</div>
-			<div class="col-2">
+		</div>
+		<div class="mb-3 row">
+			<div class="col-3">
 				<label for="inputAvailable" class="form-label">Disponibilité</label>
 				<input type="number" class="form-control" id="inputAvailable" value="1" required>
+			</div>
+			<div class="col-9">
+				<label for="inputPrice" class="form-label">Prix</label>
+				<input type="number" class="form-control" id="inputPrice" value="0" required>
 			</div>
 		</div>
 		<div class="mb-3">
@@ -83,6 +89,7 @@
 					$("#inputBrand").val(json.data.brand);
 					$("#inputModel").val(json.data.model);
 					$("#inputDesc").val(json.data.description);
+					$("#inputPrice").val(json.data.price);
 					$("#inputAvailable").val(json.data.availability);
 
 					if(json.data.thumbs.length <= 0)
@@ -154,6 +161,7 @@
 					model: $("#inputModel").val(),
 					description: $("#inputDesc").val(),
 					availability: $("#inputAvailable").val(),
+					price: $("#inputPrice").val(),
 				},
 				onSuccess = (req) => {
 					displayAlert(true, "Véhicule mis à jour avec succès", $("#error"));
