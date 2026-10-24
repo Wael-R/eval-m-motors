@@ -23,11 +23,6 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-record ThumbData(
-	Integer vehicleId,
-	Integer refId
-) {}
-
 @RestController
 @RequestMapping("/api/admin/vehicles")
 public class ApiAdminVehiclesController
@@ -41,7 +36,12 @@ public class ApiAdminVehiclesController
 		this.vehicles = vehicles;
 	}
 
-	ApiResult saveVehicle(Vehicle v, HttpServletResponse response)
+	public record ThumbData(
+		Integer vehicleId,
+		Integer refId
+	) {}
+
+	public ApiResult saveVehicle(Vehicle v, HttpServletResponse response)
 	{
 		try {
 			vehicles.save(v);
@@ -59,7 +59,7 @@ public class ApiAdminVehiclesController
 		return ApiResult.Get(true, "", v, response);
 	}
 
-	String addVehicleThumbs(Vehicle v, MultipartFile[] upload)
+	public String addVehicleThumbs(Vehicle v, MultipartFile[] upload)
 	{
 		FileNameMap map = URLConnection.getFileNameMap();
 
@@ -163,7 +163,6 @@ public class ApiAdminVehiclesController
 				success = true;
 				v.getThumbs().remove(ref);
 				vehicles.save(v);
-				files.dropReference(ref);
 				break;
 			}
 		}
