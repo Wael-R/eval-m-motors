@@ -48,7 +48,7 @@ class AccountIntegrationTests
 	{
 		mvc.perform(get("/")).andExpect(status().isOk());
 		mvc.perform(get("/private")).andExpect(status().isOk());
-		mvc.perform(get("/admin")).andExpect(status().isForbidden());
+		mvc.perform(get("/admin/")).andExpect(status().isForbidden());
 	}
 
 	@Test
@@ -57,7 +57,7 @@ class AccountIntegrationTests
 	{
 		mvc.perform(get("/")).andExpect(status().isOk());
 		mvc.perform(get("/private")).andExpect(status().isOk());
-		mvc.perform(get("/admin")).andExpect(status().isOk());
+		mvc.perform(get("/admin/")).andExpect(status().isOk());
 	}
 
 	@Test
@@ -72,7 +72,7 @@ class AccountIntegrationTests
 
 		users.save(u);
 
-		mvc.perform(get("/admin").with(user(u))).andExpect(status().isOk());
+		mvc.perform(get("/admin/").with(user(u))).andExpect(status().isOk());
 	}
 
 	@Test
