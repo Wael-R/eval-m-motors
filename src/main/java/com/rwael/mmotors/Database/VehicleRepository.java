@@ -11,6 +11,7 @@ import jakarta.persistence.TypedQuery;
 
 public interface VehicleRepository extends JpaRepository<Vehicle, Integer>, VehicleRepositoryEx
 {
+	List<Vehicle> findByAvailabilityGreaterThan(Integer availability);
 	Page<Vehicle> findByBrandContainingIgnoreCaseOrModelContainingIgnoreCase(String brand, String model, Pageable pageable);
 }
 

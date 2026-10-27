@@ -36,7 +36,7 @@ public class VehicleSearchService
 	{
 		String search = normalize(query);
 
-		Stream<VehicleScore> stream = vehicles.findAll().stream()
+		Stream<VehicleScore> stream = vehicles.findByAvailabilityGreaterThan(0).stream()
 			.map(vehicle -> new VehicleScore(
 				vehicle,
 				score(vehicle, search),
