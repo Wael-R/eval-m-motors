@@ -10,6 +10,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.rwael.mmotors.Database.File;
 import com.rwael.mmotors.Database.FileRepository;
+import com.rwael.mmotors.Database.Vehicle;
+import com.rwael.mmotors.Database.VehicleRepository;
 
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -23,6 +25,9 @@ public class HomeIntegrationTests
 {
 	@Autowired 
 	FileRepository files;
+
+	@Autowired
+	VehicleRepository vehicles;
 
 	@Autowired
 	MockMvc mvc;
@@ -68,5 +73,31 @@ public class HomeIntegrationTests
 		file = files.save(file);
 
 		mvc.perform(get("/content/" + file.getHash() + ".png")).andExpect(status().isOk());
+	}
+
+	@Test
+	void testGetVehicleDetails() throws Exception
+	{
+		Vehicle v = new Vehicle();
+		v.setBrand("Ford");
+		v.setModel("Focus");
+		v.setDescription("Test vehicle");
+		v.setPrice(10000);
+		v.setAvailability(1);
+
+		v = vehicles.save(v);
+
+		Vehicle v2 = new Vehicle();
+		v2.setBrand("Citroen");
+		v2.setModel("C3");
+		v2.setDescription("Unavailable vehicle");
+		v2.setPrice(10000);
+		v2.setAvailability(0);
+
+		v2 = vehicles.save(v2);
+
+		mvc.perform(get("/vehicles/" + v.getId())).andExpect(status().isOk());
+		mvc.perform(get("/vehicles/" + v2.getId())).andExpect(status().isNotFound());
+		mvc.perform(get("/vehicles/999")).andExpectAll(status().isNotFound());
 	}
 }

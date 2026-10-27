@@ -41,7 +41,7 @@ public class VehicleIntegrationTests
 		v.setModel("Vehicle");
 		v.setDescription("...");
 		v.setAvailability(1);
-		v.setPrice(1000);
+		v.setPrice(10000);
 
 		v1Id = vehicles.save(v).getId();
 
@@ -50,7 +50,7 @@ public class VehicleIntegrationTests
 		v2.setModel("Vehicle");
 		v2.setDescription("...");
 		v2.setAvailability(1);
-		v2.setPrice(1000);
+		v2.setPrice(15000);
 
 		v2Id = vehicles.save(v2).getId();
 	}
@@ -80,6 +80,47 @@ public class VehicleIntegrationTests
 
 		// Page too big
 		mvc.perform(get("/api/vehicles/list?size=30")).andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void testSearchRequests() throws Exception
+	{
+		// No query
+		mvc.perform(get("/api/vehicles/search")).andExpectAll(
+			status().isOk(),
+			jsonPath("$.content[0].brand").value("Sample"),
+			jsonPath("$.content[1].brand").value("Other")
+		);
+
+		// Valid query
+		mvc.perform(get("/api/vehicles/search?query=other")).andExpectAll(
+			status().isOk(),
+			jsonPath("$.content[0].brand").value("Other"),
+			jsonPath("$.content.length()").value(1)
+		);
+
+		// Sort Price Ascending
+		mvc.perform(get("/api/vehicles/search?sort=1")).andExpectAll(
+			status().isOk(),
+			jsonPath("$.content[0].price").value(10000),
+			jsonPath("$.content[1].price").value(15000)
+		);
+
+		// Sort Price Descending
+		mvc.perform(get("/api/vehicles/search?sort=2")).andExpectAll(
+			status().isOk(),
+			jsonPath("$.content[0].price").value(15000),
+			jsonPath("$.content[1].price").value(10000)
+		);
+
+		// Empty page
+		mvc.perform(get("/api/vehicles/search?page=2")).andExpectAll(
+			status().isOk(),
+			jsonPath("$.content.length()").value(0)
+		);
+
+		// Page too big
+		mvc.perform(get("/api/vehicles/search?size=30")).andExpect(status().isBadRequest());
 	}
 
 	@Test

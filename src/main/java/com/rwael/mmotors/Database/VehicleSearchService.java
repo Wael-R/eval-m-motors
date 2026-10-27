@@ -86,6 +86,9 @@ public class VehicleSearchService
 
 	private String normalize(String value)
 	{
+		if(value == null)
+			return "";
+
 		return value.trim().toLowerCase(Locale.ROOT).replaceAll("\\s+", " ");
 	}
 }
