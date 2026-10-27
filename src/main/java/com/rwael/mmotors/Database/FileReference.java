@@ -33,6 +33,12 @@ public class FileReference
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
 	private File file;
+
+	public String getPath()
+	{
+		File f = getFile();
+		return "/content/" + f.getHash() + "." + f.getExtension();
+	}
 }
 
 class FileRefSerializer extends StdSerializer<FileReference>
@@ -43,10 +49,9 @@ class FileRefSerializer extends StdSerializer<FileReference>
 	@Override
 	public void serialize(FileReference value, JsonGenerator gen, SerializationContext ctxt) throws JacksonException
 	{
-		File f = value.getFile();
 		gen.writeStartObject();
 		gen.writeNumberProperty("id", value.getId());
-		gen.writeStringProperty("path", "/content/" + f.getHash() + "." + f.getExtension());
+		gen.writeStringProperty("path", value.getPath());
 		gen.writeEndObject();
 	}
 }
