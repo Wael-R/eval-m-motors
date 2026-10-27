@@ -14,6 +14,8 @@ import org.springframework.web.server.ResponseStatusException;
 import com.rwael.mmotors.ApiResult;
 import com.rwael.mmotors.Database.Vehicle;
 import com.rwael.mmotors.Database.VehicleRepository;
+import com.rwael.mmotors.Database.VehicleSearchService;
+import com.rwael.mmotors.Database.VehicleSearchService.SortMode;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -22,10 +24,12 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ApiVehiclesController
 {
 	private final VehicleRepository vehicles;
+	private final VehicleSearchService search;
 
-	public ApiVehiclesController(VehicleRepository vehicles)
+	public ApiVehiclesController(VehicleRepository vehicles, VehicleSearchService search)
 	{
 		this.vehicles = vehicles;
+		this.search = search;
 	}
 
 	@GetMapping("/list")
@@ -42,6 +46,22 @@ public class ApiVehiclesController
 			page = vehicles.findAll(pageable);
 
 		return page;
+	}
+
+	@GetMapping("/search")
+	public Page<Vehicle> getSearch(@RequestParam(defaultValue = "") String query, @RequestParam(defaultValue = "0") Integer sort, HttpServletResponse response, @PageableDefault(size = 20) Pageable pageable)
+	{
+		if(pageable.getPageSize() > 20)
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Taille de page limitée à 20 éléments");
+
+		SortMode mode = SortMode.Relevance;
+
+		if(sort == 1)
+			mode = SortMode.PriceAsc;
+		else if(sort == 2)
+			mode = SortMode.PriceDesc;
+
+		return search.search(query, pageable, mode);
 	}
 
 	@GetMapping("/details/{id}")
