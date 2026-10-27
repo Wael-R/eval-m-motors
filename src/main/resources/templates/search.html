@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html th:replace="~{base::layout(~{::main}, '', _)}">
+<main>
+	<h2 class="mb-4"><span id="searchPrefix">Résultats pour</span> <span class="fw-light" id="searchTitle"></span></h2>
+
+	<p class="mb-1" id="sortHead">Trier par...</p>
+	<div class="btn-group mb-4" role="group" aria-labelledby="sortHead">
+		<input type="radio" class="btn-check" name="sort" id="sortRelevance" autocomplete="off" checked>
+		<label for="sortRelevance" class="btn btn-sm btn-outline-success">Pertinence</label>
+
+		<input type="radio" class="btn-check" name="sort" id="sortPriceAsc" autocomplete="off">
+		<label for="sortPriceAsc" class="btn btn-sm btn-outline-success">Moins cher</label>
+
+		<input type="radio" class="btn-check" name="sort" id="sortPriceDesc" autocomplete="off">
+		<label for="sortPriceDesc" class="btn btn-sm btn-outline-success">Plus cher</label>
+	</div>
+
+	<p id="error" class="d-none">Aucun résultats</p>
+
+	<div id="vehicleList" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mb-4">
+		<div class="col" id="vehicleCard" style="aspect-ratio: 5/6;">
+			<a class="text-decoration-none">
+				<div class="card h-100">
+					<img src="/missing.png" class="card-img-top object-fit-cover" style="aspect-ratio: 16/9;">
+					<div class="card-body overflow-hidden">
+						<h6 class="card-title" data-title></h6>
+						<p class="card-text" data-price></p>
+						<p class="card-text" data-desc></p>
+					</div>
+				</div>
+			</a>
+		</div>
+	</div>
+
+	<div th:replace="~{comps/page-nav}"></div>
+
+	<script>
+		const params = new URLSearchParams(location.search);
+		const card = $("#vehicleCard");
+		let page = params.get("page") ?? 0;
+		let query = params.get("query") ?? "";
+		let sort = 0;
+		let numPages = 0;
+
+		$("#sortRelevance").on("change", (ev) => {sort = 0; loadPage();});
+		$("#sortPriceAsc").on("change",  (ev) => {sort = 1; loadPage();});
+		$("#sortPriceDesc").on("change", (ev) => {sort = 2; loadPage();});
+
+		card.detach();
+
+		// function formatPrice(price)
+		// {
+		// 	const euro = Math.floor(price / 100);
+		// 	const cent = ((price / 100) - euro) * 100;
+
+		// 	if(cent > 0)
+		// 		return `${euro}€${cent}`;
+		// 	else
+		// 		return `${euro}€`;
+		// }
+
+		function loadPage()
+		{
+			$("#searchTitle").text(query);
+
+			if(query.trim().length > 0)
+				$("#searchPrefix").text("Résultats pour");
+			else
+				$("#searchPrefix").text("Résultats");
+
+			xhr("/api/vehicles/search", "GET", null, {page: page, query: query, sort: sort, size: 16},
+				onSuccess = (req, json) => {
+					$("#vehicleList").children().remove();
+					$("#error").addClass("d-none");
+
+					numPages = json.page.totalPages;
+
+					updatePageNav();
+
+					json.content.forEach((v, idx) => {
+						const c = card.clone();
+						$("img", c).attr("srcset", v.thumbs[0]?.path);
+						$("a", c).attr("href", `/vehicles/${v.id}`);
+						$("[data-title]", c).text(`${v.brand} ${v.model}`);
+						$("[data-price]", c).text(`${v.price}€`);
+						$("[data-desc]", c).text(v.description.substr(0, 60));
+
+						$("#vehicleList").append(c);
+					});
+
+					if(json.content.length <= 0)
+						$("#error").removeClass("d-none");
+				},
+				onError = (req, json) => {
+					$("#error").removeClass("d-none").text(json?.message ?? req.responseText);
+				}
+			)
+		}
+
+		loadPage();
+
+		$("#vehicleFilter").on("change", (ev) => {
+			query = ev.target.value;
+			loadPage();
+		});
+	</script>
+</main>
+</html>

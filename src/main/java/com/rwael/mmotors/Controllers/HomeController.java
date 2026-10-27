@@ -14,10 +14,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.rwael.mmotors.Database.File;
 import com.rwael.mmotors.Database.FileRepository;
 import com.rwael.mmotors.Database.UserRepository;
+import com.rwael.mmotors.Database.Vehicle;
+import com.rwael.mmotors.Database.VehicleRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,11 +30,13 @@ public class HomeController extends ControllerBase
 {
 	private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
 	private final FileRepository files;
+	private final VehicleRepository vehicles;
 
-	public HomeController(FileRepository files, UserRepository users)
+	public HomeController(FileRepository files, UserRepository users, VehicleRepository vehicles)
 	{
 		super(users);
 		this.files = files;
+		this.vehicles = vehicles;
 	}
 
 	@GetMapping("/")
@@ -64,6 +69,23 @@ public class HomeController extends ControllerBase
 	public String getPrivateTest(Model model)
 	{
 		return "index";
+	}
+
+	@GetMapping("/search")
+	public String getSearch(Model model)
+	{
+		return "search";
+	}
+
+	@GetMapping("/vehicles/{id}")
+	public String getVehicle(@PathVariable Integer id, Model model)
+	{
+		Vehicle v = vehicles.findById(id).orElse(null);
+		if(v == null)
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ce véhicule n'existe pas");
+
+		model.addAttribute(v);
+		return "vehicle";
 	}
 
 	@GetMapping("/content/{filename:.+\\..+}")
