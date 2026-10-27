@@ -84,6 +84,9 @@ public class HomeController extends ControllerBase
 		if(v == null)
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ce véhicule n'existe pas");
 
+		if(v.getAvailability() <= 0)
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ce véhicule n'est plus disponible");
+
 		model.addAttribute(v);
 		return "vehicle";
 	}
