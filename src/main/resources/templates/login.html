@@ -24,7 +24,12 @@
 					password: $("#inputPass").val(),
 				}, null,
 				onSuccess = (req) => {
-					location.assign("/");
+					const redirect = new URLSearchParams(location.search).get("redirect");
+
+					if(redirect)
+						location.replace(redirect);
+					else
+						location.replace("/");
 				},
 				onError = (req, json) => {
 					$("#loginError").removeClass("d-none").text(json?.message ?? req.responseText);

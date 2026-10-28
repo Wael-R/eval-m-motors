@@ -1,6 +1,7 @@
 package com.rwael.mmotors;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -73,6 +74,14 @@ class WebSecurityConfig
 
 		http.securityContext((c) -> c
 			.securityContextRepository(ctxRepo)
+		).exceptionHandling((c) -> c
+			.authenticationEntryPoint((req, res, ex) -> {
+				String uri = req.getRequestURI();
+				if(uri.startsWith("/private/") || uri.startsWith("/admin/"))
+					res.sendRedirect("/login?redirect=" + URLEncoder.encode(uri, "UTF-8"));
+				else
+					res.sendError(403, "Accès non autorisé");
+			})
 		).authorizeHttpRequests((c) -> c
 			.requestMatchers("/private/**").authenticated()
 			.requestMatchers("/admin/**").hasRole("ADMIN")
