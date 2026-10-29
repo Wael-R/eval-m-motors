@@ -8,12 +8,10 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class FileService {
 	private final FileRepository files;
-	private final FileReferenceRepository refs;
 
-	public FileService(FileRepository files, FileReferenceRepository refs)
+	public FileService(FileRepository files)
 	{
 		this.files = files;
-		this.refs = refs;
 	}
 
 	public FileReference getReference(File file)
@@ -42,14 +40,5 @@ public class FileService {
 		String name = file.getOriginalFilename();
 
 		return getReference(file.getBytes(), name.substring(name.lastIndexOf('.') + 1));
-	}
-
-	public void dropReference(FileReference ref)
-	{
-		File f = ref.getFile();
-		refs.delete(ref);
-
-		if(refs.countByFile(f) <= 0)
-			files.delete(f);
 	}
 }
