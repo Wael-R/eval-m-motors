@@ -65,12 +65,6 @@ public class HomeController extends ControllerBase
 		return "redirect:/";
 	}
 
-	@GetMapping("/private")
-	public String getPrivateTest(Model model)
-	{
-		return "index";
-	}
-
 	@GetMapping("/search")
 	public String getSearch(Model model)
 	{
