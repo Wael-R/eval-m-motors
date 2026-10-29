@@ -28,7 +28,7 @@
 			<span class="fw-semibold">[[${vehicle.price}]]€</span>
 		</div>
 		<div class="col-12 mt-2 mt-md-0 col-md-5">
-			<a class="w-100 h-100 btn btn-success">Acheter</a>
+			<a th:href="'/private/order/' + ${vehicle.id}" class="w-100 h-100 btn btn-success">Acheter</a>
 		</div>
 	</div>
 

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html th:replace="~{base::layout(~{::main}, 'Achat', _)}">
+<main>
+	<h2>Demande d'achat : <span class="fw-light">[[${vehicle.brand} + ' ' + ${vehicle.model}]]</span></h2>
+
+	<form>
+		<div class="my-3 row">
+			<div class="col-12 col-lg-2">
+				<label for="inputForm" class="form-label">Dossier d'achat</label>
+			</div>
+			<div class="col-12 col-lg-10">
+				<input type="file" class="form-control" id="inputForm" accept=".pdf" required>
+			</div>
+		</div>
+		<button type="submit" class="btn btn-success" id="submit">Déposer</button>
+
+		<div class="mb-1 mt-3 p-2 alert alert-warning d-none" id="error" role="alert"></div>
+	</form>
+
+	<script th:inline="javascript">
+		const vehicleId = /*[[${vehicle.id}]]*/ 0;
+		const btn = $("#submit");
+		let files = null;
+
+		$("#inputForm").on("change", (ev) => {
+			files = ev.currentTarget.files;
+		});
+
+		$("form").on("submit", (ev) => {
+			ev.preventDefault();
+
+			btn.attr("disabled", "");
+
+			xhr("/api/private/order", "POST", files, {id: vehicleId},
+				onSuccess = (req) => {
+					location.replace("/private/");
+				},
+				onError = (req, json) => {
+					displayAlert(false, json?.message ?? req.responseText, $("#error"));
+					btn.removeAttr("disabled");
+				}
+			)
+		});
+	</script>
+</main>
+</html>
