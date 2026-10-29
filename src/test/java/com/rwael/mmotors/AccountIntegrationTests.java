@@ -47,7 +47,7 @@ class AccountIntegrationTests
 	void testLoggedInRoutePermissions() throws Exception
 	{
 		mvc.perform(get("/")).andExpect(status().isOk());
-		mvc.perform(get("/private")).andExpect(status().isOk());
+		mvc.perform(get("/private/")).andExpect(status().isOk());
 		mvc.perform(get("/admin/")).andExpect(status().isForbidden());
 	}
 
@@ -56,7 +56,7 @@ class AccountIntegrationTests
 	void testAdminRoutePermissions() throws Exception
 	{
 		mvc.perform(get("/")).andExpect(status().isOk());
-		mvc.perform(get("/private")).andExpect(status().isOk());
+		mvc.perform(get("/private/")).andExpect(status().isOk());
 		mvc.perform(get("/admin/")).andExpect(status().isOk());
 	}
 
