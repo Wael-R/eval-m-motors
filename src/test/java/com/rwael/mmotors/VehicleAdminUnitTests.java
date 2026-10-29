@@ -262,7 +262,7 @@ public class VehicleAdminUnitTests
 
 		FileReference reference = mock(FileReference.class);
 
-		when(files.getReference(any(byte[].class), eq("png"))).thenReturn(reference);
+		when(files.getReference(file)).thenReturn(reference);
 
 		String result = controller.addVehicleThumbs(sampleVehicle, new MultipartFile[]{file});
 
@@ -270,7 +270,7 @@ public class VehicleAdminUnitTests
 		assertEquals(1, sampleVehicle.getThumbs().size());
 		assertSame(reference, sampleVehicle.getThumbs().get(0));
 
-		verify(files).getReference(contents, "png");
+		verify(files).getReference(file);
 	}
 
 	@Test
@@ -288,6 +288,6 @@ public class VehicleAdminUnitTests
 		assertNotNull(result);
 		assertEquals("Les fichiers doivent être au format PNG, JPG ou JPEG", result);
 
-		verify(files, never()).getReference(any(byte[].class), anyString());
+		verify(files, never()).getReference(any(MultipartFile.class));
 	}
 }

@@ -38,8 +38,8 @@ class AccountIntegrationTests
 	void testLoggedOutRoutePermissions() throws Exception
 	{
 		mvc.perform(get("/")).andExpect(status().isOk());
-		mvc.perform(get("/private/")).andExpect(status().isForbidden());
-		mvc.perform(get("/admin/")).andExpect(status().isForbidden());
+		mvc.perform(get("/private/")).andExpect(status().is3xxRedirection());
+		mvc.perform(get("/admin/")).andExpect(status().is3xxRedirection());
 	}
 
 	@Test
