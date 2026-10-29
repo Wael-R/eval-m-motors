@@ -2,13 +2,18 @@ package com.rwael.mmotors;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,7 +33,11 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.stereotype.Component;
 
+import com.rwael.mmotors.Database.File;
+import com.rwael.mmotors.Database.FileReferenceRepository;
+import com.rwael.mmotors.Database.FileRepository;
 import com.rwael.mmotors.Database.User;
 import com.rwael.mmotors.Database.UserRepository;
 
@@ -37,7 +46,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import tools.jackson.databind.ObjectMapper;
 
-@Configuration 
+@Configuration
 @EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO)
 public class MmotorsConfig
 {
@@ -50,8 +59,38 @@ public class MmotorsConfig
 	}
 }
 
+@Component
+class ScheduledTasks
+{
+	private final Logger log = LoggerFactory.getLogger(getClass());
+	private final FileRepository files;
+	private final FileReferenceRepository refs;
+
+	public ScheduledTasks(FileRepository files, FileReferenceRepository refs)
+	{
+		this.files = files;
+		this.refs = refs;
+	}
+
+	@Scheduled(fixedRate = 1000 * 60 * 60 * 24)
+	public void cleanupFiles()
+	{
+		List<File> cleanup = new ArrayList<>();
+
+		for(File file : files.findAll())
+		{
+			if(refs.countByFile(file) <= 0)
+				cleanup.add(file);
+		}
+
+		log.info("Cleaning up " + cleanup.size() + " unused files");
+
+		files.deleteAll(cleanup);
+	}
+}
+
 @Configuration
-@EnableWebSecurity 
+@EnableWebSecurity
 class WebSecurityConfig
 {
 	private final UserRepository users;
