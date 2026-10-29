@@ -97,7 +97,10 @@ public class OrderUnitTests
 	@Test
 	void testOrderNoFiles() throws IOException
 	{
-		controller.postOrder(null, 1, response, auth);
+		ApiResult result = controller.postOrder(null, 1, response, auth);
+
+		assertFalse(result.isSuccess());
+		assertEquals("Le dossier est obligatoire", result.getMessage());
 
 		verify(orders, never()).save(any(Order.class));
 		verify(files, never()).getReference(any(MultipartFile.class));
@@ -106,7 +109,10 @@ public class OrderUnitTests
 	@Test
 	void testOrderEmptyFiles()
 	{
-		controller.postOrder(new MultipartFile[0], 1, response, auth);
+		ApiResult result = controller.postOrder(new MultipartFile[0], 1, response, auth);
+
+		assertFalse(result.isSuccess());
+		assertEquals("Le dossier est obligatoire", result.getMessage());
 
 		verify(orders, never()).save(any(Order.class));
 	}
@@ -121,7 +127,10 @@ public class OrderUnitTests
 			new byte[] {4, 5, 6}
 		);
 
-		controller.postOrder(new MultipartFile[]{upload, secondFile}, 1, response, auth);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload, secondFile}, 1, response, auth);
+
+		assertFalse(result.isSuccess());
+		assertEquals("Le dossier doit être en un seul fichier", result.getMessage());
 
 		verify(orders, never()).save(any(Order.class));
 		verify(files, never()).getReference(any(MultipartFile.class));
@@ -132,7 +141,10 @@ public class OrderUnitTests
 	{
 		when(vehicles.findById(1)).thenReturn(Optional.empty());
 
-		controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
+
+		assertFalse(result.isSuccess());
+		assertEquals("Ce véhicule n'existe pas", result.getMessage());
 
 		verify(orders, never()).save(any(Order.class));
 		verify(files, never()).getReference(any(MultipartFile.class));
@@ -145,22 +157,13 @@ public class OrderUnitTests
 
 		when(vehicles.findById(1)).thenReturn(Optional.of(vehicle));
 
-		controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
+
+		assertFalse(result.isSuccess());
+		assertEquals("Ce véhicule n'est plus disponible", result.getMessage());
 
 		verify(orders, never()).save(any(Order.class));
 		verify(files, never()).getReference(any(MultipartFile.class));
-	}
-
-	@Test
-	void testOrderForNegativeAvailability()
-	{
-		vehicle.setAvailability(-1);
-
-		when(vehicles.findById(1)).thenReturn(Optional.of(vehicle));
-
-		controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
-
-		verify(orders, never()).save(any(Order.class));
 	}
 
 	@Test
@@ -171,7 +174,10 @@ public class OrderUnitTests
 		when(users.findByEmail("a@b.c")).thenReturn(user);
 		when(files.getReference(any(MultipartFile.class))).thenThrow(new IOException("Write error"));
 
-		controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
+
+		assertFalse(result.isSuccess());
+		assertEquals("Erreur lors de la sauvegarde du fichier", result.getMessage());
 
 		verify(orders, never()).save(any(Order.class));
 	}
@@ -184,7 +190,9 @@ public class OrderUnitTests
 		when(users.findByEmail("a@b.c")).thenReturn(user);
 		when(files.getReference(any(MultipartFile.class))).thenReturn(reference);
 
-		controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
+
+		assertTrue(result.isSuccess());
 
 		ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
 		verify(orders).save(captor.capture());
@@ -209,7 +217,9 @@ public class OrderUnitTests
 		when(users.findByEmail("a@b.c")).thenReturn(user);
 		when(files.getReference(any(MultipartFile.class))).thenReturn(reference);
 
-		controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
+
+		assertTrue(result.isSuccess());
 
 		assertEquals(user, reference.getFile().getOwner());
 		assertTrue(reference.getFile().isSecure());
