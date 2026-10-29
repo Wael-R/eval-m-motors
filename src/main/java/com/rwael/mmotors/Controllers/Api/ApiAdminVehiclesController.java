@@ -75,9 +75,7 @@ public class ApiAdminVehiclesController
 		{
 			try
 			{
-				String name = file.getOriginalFilename();
-
-				v.getThumbs().add(files.getReference(file.getBytes(), name.substring(name.lastIndexOf('.') + 1)));
+				v.getThumbs().add(files.getReference(file));
 			}
 			catch(IOException e)
 			{

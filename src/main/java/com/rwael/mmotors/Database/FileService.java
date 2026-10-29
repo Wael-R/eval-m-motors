@@ -1,6 +1,9 @@
 package com.rwael.mmotors.Database;
 
+import java.io.IOException;
+
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileService {
@@ -32,6 +35,13 @@ public class FileService {
 		f.setExtension(ext);
 
 		return getReference(f);
+	}
+
+	public FileReference getReference(MultipartFile file) throws IOException
+	{
+		String name = file.getOriginalFilename();
+
+		return getReference(file.getBytes(), name.substring(name.lastIndexOf('.') + 1));
 	}
 
 	public void dropReference(FileReference ref)
