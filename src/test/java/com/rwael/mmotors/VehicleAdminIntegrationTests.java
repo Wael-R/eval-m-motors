@@ -78,8 +78,16 @@ public class VehicleAdminIntegrationTests
 	@WithMockUser(roles = {"ADMIN"})
 	void testAddVehicle() throws Exception
 	{
-		mvc.perform(post("/api/admin/vehicles/add")
+		MockMultipartFile thumbnail = new MockMultipartFile(
+			"files",
+			"thumbnail.png",
+			"image/png",
+			new byte[] {1, 2, 3}
+		);
+
+		mvc.perform(multipart("/api/admin/vehicles/add")
 			.with(csrf())
+			.file(thumbnail)
 			.param("brand", "Ford")
 			.param("model", "Focus")
 			.param("description", "A test vehicle")
