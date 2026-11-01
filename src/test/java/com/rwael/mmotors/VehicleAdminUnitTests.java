@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -31,6 +29,7 @@ import com.rwael.mmotors.Controllers.Api.ApiAdminVehiclesController;
 import com.rwael.mmotors.Controllers.Api.ApiAdminVehiclesController.ThumbData;
 import com.rwael.mmotors.Database.FileReference;
 import com.rwael.mmotors.Database.FileService;
+import com.rwael.mmotors.Database.User;
 import com.rwael.mmotors.Database.Vehicle;
 import com.rwael.mmotors.Database.VehicleRepository;
 
@@ -262,7 +261,7 @@ public class VehicleAdminUnitTests
 
 		FileReference reference = mock(FileReference.class);
 
-		when(files.getReference(file)).thenReturn(reference);
+		when(files.getReference(file, null)).thenReturn(reference);
 
 		String result = controller.addVehicleThumbs(sampleVehicle, new MultipartFile[]{file});
 
@@ -270,7 +269,7 @@ public class VehicleAdminUnitTests
 		assertEquals(1, sampleVehicle.getThumbs().size());
 		assertSame(reference, sampleVehicle.getThumbs().get(0));
 
-		verify(files).getReference(file);
+		verify(files).getReference(file, null);
 	}
 
 	@Test
@@ -288,6 +287,6 @@ public class VehicleAdminUnitTests
 		assertNotNull(result);
 		assertEquals("Les fichiers doivent être au format PNG, JPG ou JPEG", result);
 
-		verify(files, never()).getReference(any(MultipartFile.class));
+		verify(files, never()).getReference(any(MultipartFile.class), any(User.class));
 	}
 }

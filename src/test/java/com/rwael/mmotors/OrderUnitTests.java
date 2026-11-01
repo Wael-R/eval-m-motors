@@ -107,7 +107,7 @@ public class OrderUnitTests
 		assertEquals("Le dossier est obligatoire", result.getMessage());
 
 		verify(orders, never()).save(any(Order.class));
-		verify(files, never()).getReference(any(MultipartFile.class));
+		verify(files, never()).getReference(any(MultipartFile.class), any(User.class));
 	}
 
 	@Test
@@ -137,7 +137,7 @@ public class OrderUnitTests
 		assertEquals("Le dossier doit être en un seul fichier", result.getMessage());
 
 		verify(orders, never()).save(any(Order.class));
-		verify(files, never()).getReference(any(MultipartFile.class));
+		verify(files, never()).getReference(any(MultipartFile.class), any(User.class));
 	}
 
 	@Test
@@ -151,7 +151,7 @@ public class OrderUnitTests
 		assertEquals("Ce véhicule n'existe pas", result.getMessage());
 
 		verify(orders, never()).save(any(Order.class));
-		verify(files, never()).getReference(any(MultipartFile.class));
+		verify(files, never()).getReference(any(MultipartFile.class), any(User.class));
 	}
 
 	@Test
@@ -167,7 +167,7 @@ public class OrderUnitTests
 		assertEquals("Ce véhicule n'est plus disponible", result.getMessage());
 
 		verify(orders, never()).save(any(Order.class));
-		verify(files, never()).getReference(any(MultipartFile.class));
+		verify(files, never()).getReference(any(MultipartFile.class), any(User.class));
 	}
 
 	@Test
@@ -176,7 +176,7 @@ public class OrderUnitTests
 		when(vehicles.findById(1)).thenReturn(Optional.of(vehicle));
 		when(auth.getName()).thenReturn("a@b.c");
 		when(users.findByEmail("a@b.c")).thenReturn(user);
-		when(files.getReference(any(MultipartFile.class))).thenThrow(new IOException("Write error"));
+		when(files.getReference(any(MultipartFile.class), any(User.class))).thenThrow(new IOException("Write error"));
 
 		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
 
@@ -192,7 +192,7 @@ public class OrderUnitTests
 		when(vehicles.findById(1)).thenReturn(Optional.of(vehicle));
 		when(auth.getName()).thenReturn("a@b.c");
 		when(users.findByEmail("a@b.c")).thenReturn(user);
-		when(files.getReference(any(MultipartFile.class))).thenReturn(reference);
+		when(files.getReference(any(MultipartFile.class), any(User.class))).thenReturn(reference);
 
 		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
 
@@ -212,7 +212,7 @@ public class OrderUnitTests
 		when(vehicles.findById(1)).thenReturn(Optional.of(vehicle));
 		when(auth.getName()).thenReturn("a@b.c");
 		when(users.findByEmail("a@b.c")).thenReturn(user);
-		when(files.getReference(any(MultipartFile.class))).thenReturn(reference);
+		when(files.getReference(any(MultipartFile.class), any(User.class))).thenReturn(reference);
 
 		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
 
@@ -230,7 +230,7 @@ public class OrderUnitTests
 		assertNull(saved.getApprovalDate());
 		assertTrue(saved.getDate() != null);
 
-		verify(files).getReference(upload);
+		verify(files).getReference(upload, user);
 	}
 
 	@Test
@@ -239,7 +239,7 @@ public class OrderUnitTests
 		when(vehicles.findById(1)).thenReturn(Optional.of(vehicle));
 		when(auth.getName()).thenReturn("a@b.c");
 		when(users.findByEmail("a@b.c")).thenReturn(user);
-		when(files.getReference(any(MultipartFile.class))).thenReturn(reference);
+		when(files.getReference(any(MultipartFile.class), any(User.class))).thenReturn(reference);
 
 		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
 
