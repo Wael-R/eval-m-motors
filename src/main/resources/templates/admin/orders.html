@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html th:replace="~{base::layout(~{::main}, 'Administrateur', _)}">
+<main>
+	<h2 class="mb-4">Dossiers</h2>
+
+	<div class="d-flex flex-row">
+		<div class="me-3">
+			<p class="mb-1" id="sortHead">Trier par...</p>
+			<div class="btn-group mb-4" role="group" aria-labelledby="sortHead">
+				<input type="radio" class="btn-check" name="sort" id="sortOldest" autocomplete="off" checked>
+				<label for="sortOldest" class="btn btn-sm btn-outline-success">Plus ancien</label>
+
+				<input type="radio" class="btn-check" name="sort" id="sortNewest" autocomplete="off">
+				<label for="sortNewest" class="btn btn-sm btn-outline-success">Plus récent</label>
+			</div>
+		</div>
+
+		<div class="me-3">
+			<p class="mb-1" id="filterHead">Filtrer...</p>
+			<div class="btn-group mb-4" role="group" aria-labelledby="filterHead">
+				<input type="radio" class="btn-check" name="filter" id="filterPending" autocomplete="off" checked>
+				<label for="filterPending" class="btn btn-sm btn-outline-success">En cours</label>
+
+				<input type="radio" class="btn-check" name="filter" id="filterApproved" autocomplete="off">
+				<label for="filterApproved" class="btn btn-sm btn-outline-success">Validés</label>
+
+				<input type="radio" class="btn-check" name="filter" id="filterDenied" autocomplete="off">
+				<label for="filterDenied" class="btn btn-sm btn-outline-success">Refusés</label>
+
+				<input type="radio" class="btn-check" name="filter" id="filterAny" autocomplete="off">
+				<label for="filterAny" class="btn btn-sm btn-outline-success">Tous</label>
+			</div>
+		</div>
+	</div>
+
+	<p id="error" class="d-none">Aucun résultats</p>
+
+	<div id="orderList">
+		<a href="/admin/orders/" class="text-decoration-none" id="orderCard">
+			<div class="card mb-2">
+				<div class="card-body">
+					<div class="row">
+						<div class="col-6">
+							<h5 class="card-title" data-title>Ford Focus</h5>
+						</div>
+						<div class="col-6">
+							<h6 class="card-title text-end fw-light">Déposé le <span data-date>DD/MM/YYYY HH:MM</span></h6>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-6">
+							<p class="card-text" data-name>Nom Prénom</p>
+						</div>
+						<div class="col-6">
+							<p class="card-text text-end fw-light" data-status>En cours</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</a>
+	</div>
+
+	<div th:replace="~{comps/page-nav}"></div>
+
+	<script>
+		const card = $("#orderCard").removeAttr("id");
+
+		card.detach();
+
+		let page = 0;
+		let sort = 0;
+		let filter = 0;
+		let numPages = 0;
+
+		$("#sortOldest").on("change", (ev) => {sort = 0; loadPage();});
+		$("#sortNewest").on("change", (ev) => {sort = 1; loadPage();});
+
+		$("#filterPending").on("change",  (ev) => {filter = 0; loadPage();});
+		$("#filterApproved").on("change", (ev) => {filter = 1; loadPage();});
+		$("#filterDenied").on("change",   (ev) => {filter = 2; loadPage();});
+		$("#filterAny").on("change",      (ev) => {filter = 3; loadPage();});
+
+		function loadPage()
+		{
+			xhr("/api/admin/orders/list", "GET", null, {page: page, sort: sort, filter: filter, size: 16},
+				onSuccess = (req, json) => {
+					$("#orderList").children().remove();
+					$("#error").addClass("d-none");
+
+					numPages = json.page.totalPages;
+
+					updatePageNav();
+
+					json.content.forEach((o, idx) => {
+						const c = card.clone();
+						c.attr("href", `/admin/orders/${o.id}`);
+						$("[data-title]", c).text(`${o.vehicle.brand} ${o.vehicle.model}`);
+						const d = new Date(o.date);
+						const date = d.toLocaleDateString("fr-FR");
+						const time = d.toLocaleTimeString("fr-FR");
+
+						$("[data-date]", c).text(`${date}, à ${time}`);
+						$("[data-name]", c).text(`${o.user.lastName.toUpperCase()} ${o.user.firstName}`);
+
+						if(o.approvalDate)
+						{
+							const d = new Date(o.approvalDate);
+							const date = d.toLocaleDateString("fr-FR");
+							const time = d.toLocaleTimeString("fr-FR");
+
+							if(o.approved)
+								$("[data-status]", c).text(`Validé le ${date}, à ${time}`);
+							else
+								$("[data-status]", c).text(`Refusé le ${date}, à ${time}`);
+						}
+						else
+							$("[data-status]", c).text("En cours");
+
+						$("#orderList").append(c);
+					});
+
+					if(json.content.length <= 0)
+						$("#error").removeClass("d-none");
+				},
+				onError = (req, json) => {
+					$("#error").removeClass("d-none").text(json?.message ?? req.responseText);
+				}
+			)
+		}
+
+		loadPage();
+
+	</script>
+</main>
+</html>

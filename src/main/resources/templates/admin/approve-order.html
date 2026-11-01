@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html th:replace="~{base::layout(~{::main}, 'Administrateur', _)}">
+<main>
+	<h2>Validation du dossier pour <a th:href="'/vehicles/' + ${order.vehicle.id}" th:text="${order.vehicle.brand} + ' ' + ${order.vehicle.model}" class="fw-light"></a></h2>
+
+	<p th:text="'Soumis par ' + ${order.user.lastName} + ' ' + ${order.user.firstName}"></p>
+
+	<iframe th:src="${order.form.path}" frameborder="0" width="100%" height="800" class="my-3"></iframe>
+
+	<div class="d-flex flex-row">
+		<button type="button" class="btn btn-success me-2" id="approve">Valider</button>
+		<button type="button" class="btn btn-danger" id="deny">Refuser</button>
+	</div>
+	
+	<div class="mb-1 mt-3 p-2 alert alert-warning d-none" id="error" role="alert"></div>
+
+	<script th:inline="javascript">
+		const orderId = /*[[${order.id}]]*/ 0;
+		const approve = $("#approve");
+		const deny = $("#deny");
+
+		function send(approved)
+		{
+			approve.attr("disabled", "");
+			deny.attr("disabled", "");
+
+			xhr("/api/admin/orders/approve", "POST", null, {id: orderId, approved: approved},
+				onSuccess = (req) => {
+					location.replace("/admin/orders/");
+				},
+				onError = (req, json) => {
+					displayAlert(false, json?.message ?? req.responseText, $("#error"));
+					approve.removeAttr("disabled");
+					deny.removeAttr("disabled");
+				}
+			);
+		}
+
+		approve.on("click", (ev) => { send(true); });
+		deny.on("click", (ev) => { send(false); });
+	</script>
+</main>
+</html>
