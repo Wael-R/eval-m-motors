@@ -6,11 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import com.rwael.mmotors.Controllers.Api.ApiPrivateController;
@@ -26,6 +29,7 @@ import com.rwael.mmotors.Database.VehicleRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -180,6 +184,26 @@ public class OrderUnitTests
 		assertEquals("Erreur lors de la sauvegarde du fichier", result.getMessage());
 
 		verify(orders, never()).save(any(Order.class));
+	}
+
+	@Test
+	void testDuplicateOrder() throws Exception
+	{
+		when(vehicles.findById(1)).thenReturn(Optional.of(vehicle));
+		when(auth.getName()).thenReturn("a@b.c");
+		when(users.findByEmail("a@b.c")).thenReturn(user);
+		when(files.getReference(any(MultipartFile.class))).thenReturn(reference);
+
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
+
+		assertTrue(result.isSuccess());
+
+		when(orders.findPendingByUserAndVehicle(true, user, vehicle)).thenReturn(List.of(mock(Order.class)));
+
+		ApiResult result2 = controller.postOrder(new MultipartFile[]{upload}, 1, response, auth);
+
+		assertFalse(result2.isSuccess());
+		assertEquals("Vous avez déjà un dossier en cours de traitement pour ce véhicule", result2.getMessage());
 	}
 
 	@Test
