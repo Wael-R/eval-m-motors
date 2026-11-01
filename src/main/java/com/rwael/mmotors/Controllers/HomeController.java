@@ -2,6 +2,7 @@ package com.rwael.mmotors.Controllers;
 
 import java.net.FileNameMap;
 import java.net.URLConnection;
+import java.util.List;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -92,7 +93,16 @@ public class HomeController extends ControllerBase
 		response.setHeader("Content-Security-Policy", "frame-ancestors 'self'");
 		response.setHeader("X-Frame-Options", "SAMEORIGIN");
 
-		File file = files.findByFilename(filename);
+		File file = files.findByFilenameAndOwner(filename, user);
+		if(file == null)
+		{
+			// dumb bodge for per-user files
+			// needs extra care taken to avoid this issue but i do not have the time :0
+			List<File> all = files.findByFilename(filename);
+			if(all.size() > 0)
+				file = all.get(0);
+		}
+
 		if(file == null)
 			return ResponseEntity.notFound().build();
 		else

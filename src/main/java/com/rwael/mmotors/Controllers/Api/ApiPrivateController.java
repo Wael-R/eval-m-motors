@@ -67,7 +67,7 @@ public class ApiPrivateController
 
 			Order o = new Order();
 
-			FileReference ref = files.getReference(upload[0]);
+			FileReference ref = files.getReference(upload[0], u);
 			ref.getFile().setOwner(u);
 			ref.getFile().setSecure(true);
 

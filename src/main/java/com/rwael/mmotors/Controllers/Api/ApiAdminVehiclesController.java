@@ -75,7 +75,7 @@ public class ApiAdminVehiclesController
 		{
 			try
 			{
-				v.getThumbs().add(files.getReference(file));
+				v.getThumbs().add(files.getReference(file, null));
 			}
 			catch(IOException e)
 			{

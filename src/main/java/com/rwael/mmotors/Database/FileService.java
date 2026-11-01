@@ -14,9 +14,9 @@ public class FileService {
 		this.files = files;
 	}
 
-	public FileReference getReference(File file)
+	public FileReference getReference(File file, User owner)
 	{
-		File f = files.findByHash(file.getHash());
+		File f = files.findByHashAndOwner(file.getHash(), owner);
 		if(f == null)
 			f = file;
 
@@ -26,19 +26,19 @@ public class FileService {
 		return ref;
 	}
 
-	public FileReference getReference(byte[] contents, String ext)
+	public FileReference getReference(byte[] contents, String ext, User owner)
 	{
 		File f = new File();
 		f.setContent(contents);
 		f.setExtension(ext);
 
-		return getReference(f);
+		return getReference(f, owner);
 	}
 
-	public FileReference getReference(MultipartFile file) throws IOException
+	public FileReference getReference(MultipartFile file, User owner) throws IOException
 	{
 		String name = file.getOriginalFilename();
 
-		return getReference(file.getBytes(), name.substring(name.lastIndexOf('.') + 1));
+		return getReference(file.getBytes(), name.substring(name.lastIndexOf('.') + 1), owner);
 	}
 }
