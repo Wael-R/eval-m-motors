@@ -87,8 +87,11 @@ public class HomeController extends ControllerBase
 
 	@GetMapping("/content/{filename:.+\\..+}")
 	@ResponseBody
-	public ResponseEntity<Resource> getResource(@PathVariable String filename)
+	public ResponseEntity<Resource> getResource(@PathVariable String filename, HttpServletResponse response)
 	{
+		response.setHeader("Content-Security-Policy", "frame-ancestors 'self'");
+		response.setHeader("X-Frame-Options", "SAMEORIGIN");
+
 		File file = files.findByFilename(filename);
 		if(file == null)
 			return ResponseEntity.notFound().build();
