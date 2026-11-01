@@ -71,6 +71,6 @@ public class ApiAdminOrdersController
 		o.setApprovalDate(Timestamp.valueOf(LocalDateTime.now()));
 
 		orders.save(o);
-		return ApiResult.Get(false, "", response);
+		return ApiResult.Get(true, "", response);
 	}
 }
