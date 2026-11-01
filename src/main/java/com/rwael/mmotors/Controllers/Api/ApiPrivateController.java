@@ -61,6 +61,10 @@ public class ApiPrivateController
 		try
 		{
 			User u = users.findByEmail(auth.getName());
+			
+			if(orders.findPendingByUserAndVehicle(true, u, v).size() > 0)
+				return ApiResult.Get(false, "Vous avez déjà un dossier en cours de traitement pour ce véhicule", response);
+
 			Order o = new Order();
 
 			FileReference ref = files.getReference(upload[0]);
