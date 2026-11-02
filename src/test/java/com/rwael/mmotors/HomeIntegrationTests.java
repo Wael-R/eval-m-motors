@@ -84,6 +84,7 @@ public class HomeIntegrationTests
 		v.setDescription("Test vehicle");
 		v.setPrice(10000);
 		v.setAvailability(1);
+		v.setForRenting(false);
 
 		v = vehicles.save(v);
 
@@ -93,6 +94,7 @@ public class HomeIntegrationTests
 		v2.setDescription("Unavailable vehicle");
 		v2.setPrice(10000);
 		v2.setAvailability(0);
+		v2.setForRenting(false);
 
 		v2 = vehicles.save(v2);
 

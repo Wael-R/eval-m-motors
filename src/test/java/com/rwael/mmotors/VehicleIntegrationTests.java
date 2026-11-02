@@ -42,6 +42,7 @@ public class VehicleIntegrationTests
 		v.setDescription("...");
 		v.setAvailability(1);
 		v.setPrice(10000);
+		v.setForRenting(false);
 
 		v1Id = vehicles.save(v).getId();
 
@@ -51,6 +52,7 @@ public class VehicleIntegrationTests
 		v2.setDescription("...");
 		v2.setAvailability(1);
 		v2.setPrice(15000);
+		v2.setForRenting(false);
 
 		v2Id = vehicles.save(v2).getId();
 	}

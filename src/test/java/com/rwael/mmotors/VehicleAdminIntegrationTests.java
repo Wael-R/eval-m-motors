@@ -92,7 +92,8 @@ public class VehicleAdminIntegrationTests
 			.param("model", "Focus")
 			.param("description", "A test vehicle")
 			.param("price", "10000")
-			.param("availability", "2"))
+			.param("availability", "2")
+			.param("forRenting", "0"))
 			.andExpect(status().isOk());
 
 		assertEquals(1, vehicles.count());
@@ -114,7 +115,8 @@ public class VehicleAdminIntegrationTests
 			.param("model", "Focus")
 			.param("description", "First vehicle")
 			.param("price", "10000")
-			.param("availability", "1"))
+			.param("availability", "1")
+			.param("forRenting", "0"))
 			.andExpect(status().isOk());
 
 		mvc.perform(post("/api/admin/vehicles/add")
@@ -186,6 +188,7 @@ public class VehicleAdminIntegrationTests
 		vehicle.setDescription("Original description");
 		vehicle.setPrice(10000);
 		vehicle.setAvailability(1);
+		vehicle.setForRenting(false);
 		vehicle = vehicles.save(vehicle);
 
 		mvc.perform(post("/api/admin/vehicles/edit")
@@ -226,6 +229,7 @@ public class VehicleAdminIntegrationTests
 		vehicle.setDescription("Test vehicle");
 		vehicle.setPrice(10000);
 		vehicle.setAvailability(1);
+		vehicle.setForRenting(false);
 		vehicle = vehicles.save(vehicle);
 
 		mvc.perform(post("/api/admin/vehicles/delete")
@@ -259,6 +263,7 @@ public class VehicleAdminIntegrationTests
 		vehicle.setDescription("Test vehicle");
 		vehicle.setPrice(10000);
 		vehicle.setAvailability(1);
+		vehicle.setForRenting(false);
 		vehicle = vehicles.save(vehicle);
 
 		MockMultipartFile thumbnail = new MockMultipartFile(
@@ -289,6 +294,7 @@ public class VehicleAdminIntegrationTests
 		vehicle.setDescription("Test vehicle");
 		vehicle.setPrice(10000);
 		vehicle.setAvailability(1);
+		vehicle.setForRenting(false);
 		vehicle = vehicles.save(vehicle);
 
 		MockMultipartFile first = new MockMultipartFile(
@@ -328,6 +334,7 @@ public class VehicleAdminIntegrationTests
 		vehicle.setDescription("Test vehicle");
 		vehicle.setPrice(10000);
 		vehicle.setAvailability(1);
+		vehicle.setForRenting(false);
 		vehicle = vehicles.save(vehicle);
 
 		MockMultipartFile thumbnail = new MockMultipartFile(
@@ -360,6 +367,7 @@ public class VehicleAdminIntegrationTests
 		vehicle.setDescription("Test vehicle");
 		vehicle.setPrice(10000);
 		vehicle.setAvailability(1);
+		vehicle.setForRenting(false);
 		vehicle = vehicles.save(vehicle);
 
 		MockMultipartFile valid = new MockMultipartFile(
@@ -401,6 +409,7 @@ public class VehicleAdminIntegrationTests
 		vehicle.setDescription("Test vehicle");
 		vehicle.setPrice(10000);
 		vehicle.setAvailability(1);
+		vehicle.setForRenting(false);
 		vehicle = vehicles.save(vehicle);
 
 		MockMultipartFile thumbnail = new MockMultipartFile(
@@ -447,6 +456,7 @@ public class VehicleAdminIntegrationTests
 		vehicle.setDescription("Test vehicle");
 		vehicle.setPrice(10000);
 		vehicle.setAvailability(1);
+		vehicle.setForRenting(false);
 		vehicle = vehicles.save(vehicle);
 
 		mvc.perform(post("/api/admin/vehicles/delete-thumbs")
