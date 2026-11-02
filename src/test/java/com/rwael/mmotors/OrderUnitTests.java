@@ -3,12 +3,15 @@ package com.rwael.mmotors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -37,9 +40,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderUnitTests
@@ -236,5 +247,105 @@ public class OrderUnitTests
 		assertTrue(reference.getFile().isSecure());
 
 		verify(orders).save(any(Order.class));
+	}
+
+	@Test
+	void testOrderListPageTooLarge() {
+		Pageable pageable = PageRequest.of(0, 21);
+
+		ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> controller.getOrderList(0, 0, user, new MockHttpServletResponse(), pageable));
+
+		assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+		verifyNoInteractions(orders);
+	}
+
+	@Test
+	void testOrderListPending() {
+		Pageable pageable = PageRequest.of(0, 10);
+		Pageable expected = PageRequest.of(0, 10, Sort.by("date").descending());
+
+		Page<Order> resultPage = new PageImpl<>(List.of());
+
+		when(orders.findByPendingAndUser(true, user, expected)).thenReturn(resultPage);
+
+		Page<Order> result = controller.getOrderList(0, 0, user, new MockHttpServletResponse(), pageable);
+
+		assertSame(resultPage, result);
+		verify(orders).findByPendingAndUser(true, user, expected);
+	}
+
+	@Test
+	void testOrderListApproved() {
+		Pageable pageable = PageRequest.of(0, 10);
+		Pageable expected = PageRequest.of(0, 10, Sort.by("date").descending());
+
+		Page<Order> resultPage = new PageImpl<>(List.of());
+
+		when(orders.findByApprovedAndUser(true, user, expected)).thenReturn(resultPage);
+
+		Page<Order> result = controller.getOrderList(0, 1, user, new MockHttpServletResponse(), pageable);
+
+		assertSame(resultPage, result);
+		verify(orders).findByApprovedAndUser(true, user, expected);
+	}
+
+	@Test
+	void testOrderListRejected() {
+		Pageable pageable = PageRequest.of(0, 10);
+		Pageable expected = PageRequest.of(0, 10, Sort.by("date").descending());
+
+		Page<Order> resultPage = new PageImpl<>(List.of());
+
+		when(orders.findByApprovedAndUser(false, user, expected)).thenReturn(resultPage);
+
+		Page<Order> result = controller.getOrderList(0, 2, user, new MockHttpServletResponse(), pageable);
+
+		assertSame(resultPage, result);
+		verify(orders).findByApprovedAndUser(false, user, expected);
+	}
+
+	@Test
+	void testOrderListAny() {
+		Pageable pageable = PageRequest.of(0, 10);
+		Pageable expected = PageRequest.of(0, 10, Sort.by("date").descending());
+
+		Page<Order> resultPage = new PageImpl<>(List.of());
+
+		when(orders.findByUser(user, expected)).thenReturn(resultPage);
+
+		Page<Order> result = controller.getOrderList(0, 3, user, new MockHttpServletResponse(), pageable);
+
+		assertSame(resultPage, result);
+		verify(orders).findByUser(user, expected);
+	}
+
+	@Test
+	void testOrderListAscending() {
+		Pageable pageable = PageRequest.of(0, 10);
+		Pageable expected = PageRequest.of(0, 10, Sort.by("date").ascending());
+
+		Page<Order> resultPage = new PageImpl<>(List.of());
+
+		when(orders.findByPendingAndUser(true, user, expected)).thenReturn(resultPage);
+
+		Page<Order> result = controller.getOrderList(1, 0, user, new MockHttpServletResponse(), pageable);
+
+		assertSame(resultPage, result);
+		verify(orders).findByPendingAndUser(true, user, expected);
+	}
+
+	@Test
+	void testOrderListPages() {
+		Pageable pageable = PageRequest.of(2, 15);
+		Pageable expected = PageRequest.of(2, 15, Sort.by("date").descending());
+
+		Page<Order> resultPage = new PageImpl<>(List.of());
+
+		when(orders.findByPendingAndUser(true, user, expected)).thenReturn(resultPage);
+
+		Page<Order> result = controller.getOrderList(0, 0, user, new MockHttpServletResponse(), pageable);
+
+		assertSame(resultPage, result);
+		verify(orders).findByPendingAndUser(true, user, expected);
 	}
 }
