@@ -56,6 +56,9 @@ public class Vehicle
 	@PositiveOrZero(message = "La disponibilité doit être supérieure ou égale à 0")
 	private Integer availability;
 
+	@NotNull
+	private Boolean forRenting;
+
 	@OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
 	@JoinColumn(name = "vehicle_id")
 	private List<FileReference> thumbs = new ArrayList<>();

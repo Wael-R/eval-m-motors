@@ -19,9 +19,19 @@
 				<label for="inputAvailable" class="form-label">Disponibilité</label>
 				<input type="number" class="form-control" id="inputAvailable" value="1" required>
 			</div>
-			<div class="col-9">
+			<div class="col-3 col-md-6">
 				<label for="inputPrice" class="form-label">Prix</label>
 				<input type="number" class="form-control" id="inputPrice" value="0" required>
+			</div>
+			<div class="col-6 col-md-3">
+				<label id="typeHead" class="form-label">Type</label><br>
+				<div class="btn-group w-100 row g-0" role="group" aria-labelledby="typeHead">
+					<input type="radio" class="btn-check" name="type" id="inputTypeSale" autocomplete="off" checked>
+					<label for="inputTypeSale" class="col-6 btn btn-outline-success">Achat</label>
+
+					<input type="radio" class="btn-check" name="type" id="inputTypeRent" autocomplete="off">
+					<label for="inputTypeRent" class="col-6 btn btn-outline-success">Location</label>
+				</div>
 			</div>
 		</div>
 		<div class="mb-3">
@@ -43,7 +53,7 @@
 		</div>
 		<div class="mb-3">
 			<label for="inputDesc" class="form-label">Description</label>
-			<textarea class="form-control" id="inputDesc"></textarea>
+			<textarea class="form-control" id="inputDesc" rows="10"></textarea>
 		</div>
 		<button type="submit" class="btn btn-success" id="submit" disabled>Sauvegarder</button>
 		<div class="progress mb-1 mt-3 d-none" role="progressbar" id="progress">
@@ -88,6 +98,8 @@
 					$("#inputDesc").val(json.data.description);
 					$("#inputPrice").val(json.data.price);
 					$("#inputAvailable").val(json.data.availability);
+					$("#inputTypeSale").get()[0].checked = !json.data.forRenting;
+					$("#inputTypeRent").get()[0].checked = json.data.forRenting;
 
 					if(json.data.thumbs.length <= 0)
 					{
@@ -162,6 +174,7 @@
 					description: $("#inputDesc").val(),
 					availability: $("#inputAvailable").val(),
 					price: $("#inputPrice").val(),
+					forRenting: $("#inputTypeRent").get()[0].checked,
 				},
 				onSuccess = (req) => {
 					displayAlert(true, "Véhicule mis à jour avec succès", $("#error"));

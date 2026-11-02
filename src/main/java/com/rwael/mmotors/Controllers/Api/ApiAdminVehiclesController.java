@@ -120,6 +120,7 @@ public class ApiAdminVehiclesController
 		if(entity.getDescription() != null) v.setDescription(entity.getDescription());
 		if(entity.getAvailability() != null) v.setAvailability(entity.getAvailability());
 		if(entity.getPrice() != null) v.setPrice(entity.getPrice());
+		if(entity.getForRenting() != null) v.setForRenting(entity.getForRenting());
 
 		if(upload != null && upload.length > 0)
 		{
