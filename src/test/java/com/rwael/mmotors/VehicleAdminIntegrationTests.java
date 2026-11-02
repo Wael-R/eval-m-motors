@@ -70,7 +70,8 @@ public class VehicleAdminIntegrationTests
 			.param("model", "Focus")
 			.param("description", "Test vehicle")
 			.param("price", "10000")
-			.param("availability", "1"))
+			.param("availability", "1")
+			.param("forRenting", "0"))
 			.andExpect(status().isForbidden());
 	}
 
@@ -125,7 +126,8 @@ public class VehicleAdminIntegrationTests
 			.param("model", "Focus")
 			.param("description", "Duplicate vehicle")
 			.param("price", "12000")
-			.param("availability", "3"))
+			.param("availability", "3")
+			.param("forRenting", "0"))
 			.andExpect(status().isBadRequest());
 
 		assertEquals(1, vehicles.count());
@@ -142,7 +144,8 @@ public class VehicleAdminIntegrationTests
 			.param("model", "Focus")
 			.param("description", "Test vehicle")
 			.param("price", "10000")
-			.param("availability", "1"))
+			.param("availability", "1")
+			.param("forRenting", "0"))
 			.andExpect(status().isBadRequest());
 
 		// Missing model
@@ -152,7 +155,8 @@ public class VehicleAdminIntegrationTests
 			.param("model", "")
 			.param("description", "Test vehicle")
 			.param("price", "10000")
-			.param("availability", "1"))
+			.param("availability", "1")
+			.param("forRenting", "0"))
 			.andExpect(status().isBadRequest());
 
 		// Invalid price
@@ -162,7 +166,8 @@ public class VehicleAdminIntegrationTests
 			.param("model", "Focus")
 			.param("description", "Test vehicle")
 			.param("price", "0")
-			.param("availability", "1"))
+			.param("availability", "1")
+			.param("forRenting", "0"))
 			.andExpect(status().isBadRequest());
 
 		// Invalid availability
@@ -172,7 +177,8 @@ public class VehicleAdminIntegrationTests
 			.param("model", "Focus")
 			.param("description", "Test vehicle")
 			.param("price", "10000")
-			.param("availability", "-1"))
+			.param("availability", "-1")
+			.param("forRenting", "0"))
 			.andExpect(status().isBadRequest());
 
 		assertEquals(0, vehicles.count());
@@ -198,7 +204,8 @@ public class VehicleAdminIntegrationTests
 			.param("model", "Focus")
 			.param("description", "Updated description")
 			.param("price", "15000")
-			.param("availability", "3"))
+			.param("availability", "3")
+			.param("forRenting", "1"))
 			.andExpect(status().isOk());
 
 		Vehicle updated = vehicles.findById(vehicle.getId()).orElseThrow();

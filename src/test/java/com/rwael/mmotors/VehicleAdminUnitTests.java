@@ -59,6 +59,7 @@ public class VehicleAdminUnitTests
 		v.setDescription("Test desc");
 		v.setPrice(10000);
 		v.setAvailability(1);
+		v.setForRenting(false);
 		v.setThumbs(new ArrayList<>());
 
 		return v;
@@ -74,6 +75,7 @@ public class VehicleAdminUnitTests
 		sampleVehicle.setDescription("Sample desc");
 		sampleVehicle.setPrice(15000);
 		sampleVehicle.setAvailability(5);
+		sampleVehicle.setForRenting(false);
 		sampleVehicle.setThumbs(new ArrayList<>());
 	}
 
