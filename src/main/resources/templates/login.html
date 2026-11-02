@@ -2,7 +2,7 @@
 <html th:replace="~{base::layout(~{::main}, '', _)}">
 <main>
 	<div class="align-content-center">
-		<form>
+		<form id="login">
 			<div class="mb-3">
 				<label for="inputEmail" class="form-label">Adresse e-mail</label>
 				<input type="email" class="form-control" id="inputEmail" required>
@@ -16,7 +16,7 @@
 		</form>
 	</div>
 	<script>
-		$("form").on("submit", (ev) => {
+		$("#login").on("submit", (ev) => {
 			ev.preventDefault();
 
 			xhr("/api/login", "POST", {

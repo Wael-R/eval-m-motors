@@ -3,7 +3,7 @@
 <main>
 	<h2>Demande d'achat : <span class="fw-light">[[${vehicle.brand} + ' ' + ${vehicle.model}]]</span></h2>
 
-	<form>
+	<form id="order">
 		<div class="my-3 row">
 			<div class="col-12 col-lg-2">
 				<label for="inputForm" class="form-label">Dossier d'achat</label>
@@ -39,7 +39,7 @@
 				$("#preview").addClass("d-none");
 		});
 
-		$("form").on("submit", (ev) => {
+		$("#order").on("submit", (ev) => {
 			ev.preventDefault();
 
 			btn.attr("disabled", "");

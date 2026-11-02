@@ -3,7 +3,7 @@
 <main>
 	<h2>[[${edit ? "Modification d'un véhicule" : "Nouveau véhicule"}]]</h2>
 
-	<form>
+	<form id="editVehicle">
 		<div class="mb-3 row">
 			<div class="col-3">
 				<label for="inputBrand" class="form-label">Marque</label>
@@ -144,7 +144,7 @@
 			ready = true;
 		}
 
-		$("form").on("submit", (ev) => {
+		$("#editVehicle").on("submit", (ev) => {
 			ev.preventDefault();
 
 			if(!ready)
