@@ -29,4 +29,9 @@ public interface OrderRepository extends JpaRepository<Order, Integer>
 	List<Order> findByPending(boolean pending);
 	@Query("SELECT o FROM Order o WHERE (o.approvalDate IS NULL AND :pending = true) OR (o.approvalDate IS NOT NULL AND :pending = false)")
 	Page<Order> findByPending(boolean pending, Pageable pageable);
+
+	@Query("SELECT o FROM Order o WHERE o.approvalDate IS NOT NULL AND o.approved = :approved AND o.user = :user")
+	Page<Order> findByApprovedAndUser(boolean approved, User user, Pageable pageable);
+	@Query("SELECT o FROM Order o WHERE ((o.approvalDate IS NULL AND :pending = true) OR (o.approvalDate IS NOT NULL AND :pending = false)) AND o.user = :user")
+	Page<Order> findByPendingAndUser(boolean pending, User user, Pageable pageable);
 }

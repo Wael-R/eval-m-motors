@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.rwael.mmotors.ApiResult;
 import com.rwael.mmotors.Database.FileReference;
@@ -21,7 +22,14 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
@@ -40,9 +48,17 @@ public class ApiPrivateController
 		this.users = users;
 		this.files = files;
 	}
+	
+	User user;
+
+	@ModelAttribute
+	public void fetchUser(Authentication auth)
+	{
+		user = users.findByEmail(auth.getName());
+	}
 
 	@PostMapping("/order")
-	public ApiResult postOrder(@RequestParam(name = "files", required = false) MultipartFile[] upload, @RequestParam Integer id, HttpServletResponse response, Authentication auth)
+	public ApiResult postOrder(@RequestParam(name = "files", required = false) MultipartFile[] upload, @RequestParam Integer id, HttpServletResponse response)
 	{
 		if(upload == null || upload.length <= 0)
 			return ApiResult.Get(false, "Le dossier est obligatoire", response);
@@ -60,18 +76,17 @@ public class ApiPrivateController
 
 		try
 		{
-			User u = users.findByEmail(auth.getName());
 			
-			if(orders.findPendingByUserAndVehicle(true, u, v).size() > 0)
+			if(orders.findPendingByUserAndVehicle(true, user, v).size() > 0)
 				return ApiResult.Get(false, "Vous avez déjà un dossier en cours de traitement pour ce véhicule", response);
 
 			Order o = new Order();
 
-			FileReference ref = files.getReference(upload[0], u);
-			ref.getFile().setOwner(u);
+			FileReference ref = files.getReference(upload[0], user);
+			ref.getFile().setOwner(user);
 			ref.getFile().setSecure(true);
 
-			o.setUser(u);
+			o.setUser(user);
 			o.setVehicle(v);
 			o.setForm(ref);
 			o.setDate(Timestamp.valueOf(LocalDateTime.now()));
@@ -86,5 +101,29 @@ public class ApiPrivateController
 		}
 
 		return ApiResult.Get(true, "", response);
+	}
+
+	@GetMapping("/orders/list")
+	public Page<Order> getOrderList(@RequestParam(defaultValue = "0") Integer sort, @RequestParam(defaultValue = "0") Integer filter, HttpServletResponse response, Pageable pageable)
+	{
+		if(pageable.getPageSize() > 20)
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Taille de page limitée à 20 éléments");
+
+		Integer page = pageable.getPageNumber();
+		Integer size = pageable.getPageSize();
+
+		Pageable sorted = PageRequest.of(page, size, Sort.by("date").reverse());
+
+		if(sort == 1)
+			sorted = PageRequest.of(page, size, Sort.by("date"));
+
+		if(filter == 0)
+			return orders.findByPendingAndUser(true, user, sorted);
+		else if(filter == 1)
+			return orders.findByApprovedAndUser(true, user, sorted);
+		else if(filter == 2)
+			return orders.findByApprovedAndUser(false, user, sorted);
+		else
+			return orders.findByUser(user, sorted);
 	}
 }

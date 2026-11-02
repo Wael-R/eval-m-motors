@@ -43,4 +43,10 @@ public class PrivateController extends ControllerBase
 		model.addAttribute(v);
 		return "private/order-vehicle";
 	}
+
+	@GetMapping("/orders/")
+	public String getOrders(Model model)
+	{
+		return "private/orders";
+	}
 }
