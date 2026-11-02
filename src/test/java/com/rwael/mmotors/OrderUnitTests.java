@@ -97,15 +97,12 @@ public class OrderUnitTests
 		reference = new FileReference();
 		reference.setFile(f);
 
-		when(auth.getName()).thenReturn("a@b.c");
-		when(users.findByEmail("a@b.c")).thenReturn(user);
-		controller.fetchUser(auth);
 	}
 
 	@Test
 	void testOrderNoFiles() throws IOException
 	{
-		ApiResult result = controller.postOrder(null, 1, response);
+		ApiResult result = controller.postOrder(null, 1, user, response);
 
 		assertFalse(result.isSuccess());
 		assertEquals("Le dossier est obligatoire", result.getMessage());
@@ -117,7 +114,7 @@ public class OrderUnitTests
 	@Test
 	void testOrderEmptyFiles()
 	{
-		ApiResult result = controller.postOrder(new MultipartFile[0], 1, response);
+		ApiResult result = controller.postOrder(new MultipartFile[0], 1, user, response);
 
 		assertFalse(result.isSuccess());
 		assertEquals("Le dossier est obligatoire", result.getMessage());
@@ -135,7 +132,7 @@ public class OrderUnitTests
 			new byte[] {4, 5, 6}
 		);
 
-		ApiResult result = controller.postOrder(new MultipartFile[]{upload, secondFile}, 1, response);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload, secondFile}, 1, user, response);
 
 		assertFalse(result.isSuccess());
 		assertEquals("Le dossier doit être en un seul fichier", result.getMessage());
@@ -149,7 +146,7 @@ public class OrderUnitTests
 	{
 		when(vehicles.findById(1)).thenReturn(Optional.empty());
 
-		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, user, response);
 
 		assertFalse(result.isSuccess());
 		assertEquals("Ce véhicule n'existe pas", result.getMessage());
@@ -165,7 +162,7 @@ public class OrderUnitTests
 
 		when(vehicles.findById(1)).thenReturn(Optional.of(vehicle));
 
-		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, user, response);
 
 		assertFalse(result.isSuccess());
 		assertEquals("Ce véhicule n'est plus disponible", result.getMessage());
@@ -180,7 +177,7 @@ public class OrderUnitTests
 		when(vehicles.findById(1)).thenReturn(Optional.of(vehicle));
 		when(files.getReference(any(MultipartFile.class), any(User.class))).thenThrow(new IOException("Write error"));
 
-		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, user, response);
 
 		assertFalse(result.isSuccess());
 		assertEquals("Erreur lors de la sauvegarde du fichier", result.getMessage());
@@ -194,7 +191,7 @@ public class OrderUnitTests
 		when(vehicles.findById(1)).thenReturn(Optional.of(vehicle));
 		when(orders.findPendingByUserAndVehicle(true, user, vehicle)).thenReturn(List.of(mock(Order.class)));
 
-		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, user, response);
 
 		assertFalse(result.isSuccess());
 		assertEquals("Vous avez déjà un dossier en cours de traitement pour ce véhicule", result.getMessage());
@@ -206,7 +203,7 @@ public class OrderUnitTests
 		when(vehicles.findById(1)).thenReturn(Optional.of(vehicle));
 		when(files.getReference(any(MultipartFile.class), any(User.class))).thenReturn(reference);
 
-		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, user, response);
 
 		assertTrue(result.isSuccess());
 
@@ -231,7 +228,7 @@ public class OrderUnitTests
 		when(vehicles.findById(1)).thenReturn(Optional.of(vehicle));
 		when(files.getReference(any(MultipartFile.class), any(User.class))).thenReturn(reference);
 
-		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, response);
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 1, user, response);
 
 		assertTrue(result.isSuccess());
 

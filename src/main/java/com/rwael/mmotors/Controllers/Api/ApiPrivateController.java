@@ -28,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,16 +50,14 @@ public class ApiPrivateController
 		this.files = files;
 	}
 	
-	User user;
-
 	@ModelAttribute
-	public void fetchUser(Authentication auth)
+	public void fetchUser(Authentication auth, Model model)
 	{
-		user = users.findByEmail(auth.getName());
+		model.addAttribute(users.findByEmail(auth.getName()));
 	}
 
 	@PostMapping("/order")
-	public ApiResult postOrder(@RequestParam(name = "files", required = false) MultipartFile[] upload, @RequestParam Integer id, HttpServletResponse response)
+	public ApiResult postOrder(@RequestParam(name = "files", required = false) MultipartFile[] upload, @RequestParam Integer id, @ModelAttribute User user, HttpServletResponse response)
 	{
 		if(upload == null || upload.length <= 0)
 			return ApiResult.Get(false, "Le dossier est obligatoire", response);
@@ -104,7 +103,7 @@ public class ApiPrivateController
 	}
 
 	@GetMapping("/orders/list")
-	public Page<Order> getOrderList(@RequestParam(defaultValue = "0") Integer sort, @RequestParam(defaultValue = "0") Integer filter, HttpServletResponse response, Pageable pageable)
+	public Page<Order> getOrderList(@RequestParam(defaultValue = "0") Integer sort, @RequestParam(defaultValue = "0") Integer filter, @ModelAttribute User user, HttpServletResponse response, Pageable pageable)
 	{
 		if(pageable.getPageSize() > 20)
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Taille de page limitée à 20 éléments");
