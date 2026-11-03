@@ -19,7 +19,9 @@ import com.rwael.mmotors.Database.VehicleRepository;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
@@ -57,7 +59,7 @@ public class ApiPrivateController
 	}
 
 	@PostMapping("/order")
-	public ApiResult postOrder(@RequestParam(name = "files", required = false) MultipartFile[] upload, @RequestParam Integer id, @ModelAttribute User user, HttpServletResponse response)
+	public ApiResult postOrder(@RequestParam(name = "files", required = false) MultipartFile[] upload, @RequestParam Integer id, @RequestParam(required = false) Date start, @RequestParam(required = false) Date end, @ModelAttribute(binding = false) User user, HttpServletResponse response)
 	{
 		if(upload == null || upload.length <= 0)
 			return ApiResult.Get(false, "Le dossier est obligatoire", response);
@@ -73,9 +75,20 @@ public class ApiPrivateController
 		if(v.getAvailability() <= 0)
 			return ApiResult.Get(false, "Ce véhicule n'est plus disponible", response);
 
+		if(v.getForRenting())
+		{
+			if(start == null)
+				return ApiResult.Get(false, "La date de départ de la location est obligatoire", response);
+			else if(end == null)
+				return ApiResult.Get(false, "La date de fin de la location est obligatoire", response);
+			else if(!end.after(start))
+				return ApiResult.Get(false, "La date de fin doit être après la date de départ", response);
+			else if(!start.after(Date.valueOf(LocalDate.now())))
+				return ApiResult.Get(false, "La date de départ doit être dans le futur", response);
+		}
+
 		try
 		{
-			
 			if(orders.findPendingByUserAndVehicle(true, user, v).size() > 0)
 				return ApiResult.Get(false, "Vous avez déjà un dossier en cours de traitement pour ce véhicule", response);
 
@@ -91,6 +104,12 @@ public class ApiPrivateController
 			o.setDate(Timestamp.valueOf(LocalDateTime.now()));
 			o.setApprovalDate(null);
 			o.setApproved(false);
+
+			if(v.getForRenting())
+			{
+				o.setStartDate(start);
+				o.setEndDate(end);
+			}
 
 			orders.save(o);
 		}

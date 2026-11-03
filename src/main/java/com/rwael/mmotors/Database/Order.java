@@ -1,5 +1,6 @@
 package com.rwael.mmotors.Database;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 import jakarta.persistence.CascadeType;
@@ -38,4 +39,7 @@ public class Order
 
 	private Timestamp date;
 	private Timestamp approvalDate;
+
+	private Date startDate;
+	private Date endDate;
 }
