@@ -3,7 +3,7 @@
 <main>
 	<h2 class="mb-4">Dossiers</h2>
 
-	<div class="d-flex flex-row">
+	<div class="d-block d-md-flex flex-row">
 		<div class="me-3">
 			<p class="mb-1" id="sortHead">Trier par...</p>
 			<div class="btn-group mb-4" role="group" aria-labelledby="sortHead">
@@ -29,6 +29,20 @@
 
 				<input type="radio" class="btn-check" name="filter" id="filterAny" autocomplete="off">
 				<label for="filterAny" class="btn btn-sm btn-outline-success">Tous</label>
+			</div>
+		</div>
+
+		<div class="me-3">
+			<p class="mb-1" id="filterTypeHead">Type...</p>
+			<div class="btn-group mb-4" role="group" aria-labelledby="filterTypeHead">
+				<input type="radio" class="btn-check" name="filterType" id="filterTypeAny" autocomplete="off" checked>
+				<label for="filterTypeAny" class="btn btn-sm btn-outline-success">Tous</label>
+
+				<input type="radio" class="btn-check" name="filterType" id="filterTypeSale" autocomplete="off">
+				<label for="filterTypeSale" class="btn btn-sm btn-outline-success">Achat</label>
+
+				<input type="radio" class="btn-check" name="filterType" id="filterTypeRent" autocomplete="off">
+				<label for="filterTypeRent" class="btn btn-sm btn-outline-success">Location</label>
 			</div>
 		</div>
 	</div>
@@ -70,6 +84,7 @@
 		let page = 0;
 		let sort = 0;
 		let filter = 0;
+		let filterType = 0;
 		let numPages = 0;
 
 		$("#sortOldest").on("change", (ev) => {sort = 0; loadPage();});
@@ -80,9 +95,13 @@
 		$("#filterDenied").on("change",   (ev) => {filter = 2; loadPage();});
 		$("#filterAny").on("change",      (ev) => {filter = 3; loadPage();});
 
+		$("#filterTypeAny").on("change",  (ev) => {filterType = 0; loadPage();});
+		$("#filterTypeSale").on("change", (ev) => {filterType = 1; loadPage();});
+		$("#filterTypeRent").on("change", (ev) => {filterType = 2; loadPage();});
+
 		function loadPage()
 		{
-			xhr("/api/admin/orders/list", "GET", null, {page: page, sort: sort, filter: filter, size: 16},
+			xhr("/api/admin/orders/list", "GET", null, {page: page, sort: sort, filter: filter, filterType: filterType, size: 16},
 				onSuccess = (req, json) => {
 					$("#orderList").children().remove();
 					$("#error").addClass("d-none");

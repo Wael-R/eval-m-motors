@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.rwael.mmotors.ApiResult;
 import com.rwael.mmotors.Database.Order;
 import com.rwael.mmotors.Database.OrderRepository;
+import com.rwael.mmotors.Database.OrderSpecifications;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -33,7 +35,7 @@ public class ApiAdminOrdersController
 	}
 
 	@GetMapping("/list")
-	public Page<Order> getList(@RequestParam(defaultValue = "0") Integer sort, @RequestParam(defaultValue = "0") Integer filter, HttpServletResponse response, Pageable pageable)
+	public Page<Order> getList(@RequestParam(defaultValue = "0") Integer sort, @RequestParam(defaultValue = "0") Integer filter, @RequestParam(defaultValue = "0") Integer filterType, HttpServletResponse response, Pageable pageable)
 	{
 		if(pageable.getPageSize() > 20)
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Taille de page limitée à 20 éléments");
@@ -46,14 +48,21 @@ public class ApiAdminOrdersController
 		if(sort == 1)
 			sorted = PageRequest.of(page, size, Sort.by("date").reverse());
 
+		Specification<Order> spec = Specification.unrestricted();
+
 		if(filter == 0)
-			return orders.findByPending(true, sorted);
+			spec = spec.and(OrderSpecifications.pending(true));
 		else if(filter == 1)
-			return orders.findByApproved(true, sorted);
+			spec = spec.and(OrderSpecifications.approved(true)).and(OrderSpecifications.pending(false));
 		else if(filter == 2)
-			return orders.findByApproved(false, sorted);
-		else
-			return orders.findAll(sorted);
+			spec = spec.and(OrderSpecifications.approved(false)).and(OrderSpecifications.pending(false));
+
+		if(filterType == 1)
+			spec = spec.and(OrderSpecifications.forRent(false));
+		else if(filterType == 2)
+			spec = spec.and(OrderSpecifications.forRent(true));
+
+		return orders.findAll(spec, sorted);
 	}
 
 	@PostMapping("/approve")
