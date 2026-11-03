@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import com.rwael.mmotors.Database.Vehicle;
 import com.rwael.mmotors.Database.VehicleRepository;
 import com.rwael.mmotors.Database.VehicleSearchService;
+import com.rwael.mmotors.Database.VehicleSearchService.FilterMode;
 import com.rwael.mmotors.Database.VehicleSearchService.SortMode;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +36,7 @@ class VehicleSearchUnitTests
 	Vehicle volkswagenGolf;
 	Vehicle unavailableVehicle;
 
-	private Vehicle createVehicle(Integer id, String brand, String model, Integer price, Integer availability)
+	private Vehicle createVehicle(Integer id, String brand, String model, Integer price, Integer availability, Boolean renting)
 	{
 		Vehicle v = new Vehicle();
 		v.setId(id);
@@ -44,6 +45,7 @@ class VehicleSearchUnitTests
 		v.setPrice(price);
 		v.setAvailability(availability);
 		v.setDescription("Test vehicle");
+		v.setForRenting(renting);
 
 		return v;
 	}
@@ -53,19 +55,19 @@ class VehicleSearchUnitTests
 	{
 		search = new VehicleSearchService(vehicles);
 
-		fordFocus = createVehicle(1, "Ford", "Focus", 15000, 2);
-		fordFiesta = createVehicle(2, "Ford", "Fiesta", 10000, 3);
-		toyotaCorolla = createVehicle(3, "Toyota", "Corolla", 18000, 1);
-		volkswagenGolf = createVehicle(4, "Volkswagen", "Golf", 20000, 4);
-		unavailableVehicle = createVehicle(5, "Ford", "Mustang", 30000, 0);
+		fordFocus = createVehicle(1, "Ford", "Focus", 15000, 2, false);
+		fordFiesta = createVehicle(2, "Ford", "Fiesta", 10000, 3, false);
+		toyotaCorolla = createVehicle(3, "Toyota", "Corolla", 18000, 1, false);
+		volkswagenGolf = createVehicle(4, "Volkswagen", "Golf", 20000, 4, true);
+		unavailableVehicle = createVehicle(5, "Ford", "Mustang", 30000, 0, false);
 
-		when(vehicles.findByAvailabilityGreaterThan(0)).thenReturn(List.of( fordFocus, fordFiesta, toyotaCorolla, volkswagenGolf));
+		when(vehicles.findByAvailabilityGreaterThan(0)).thenReturn(List.of(fordFocus, fordFiesta, toyotaCorolla, volkswagenGolf));
 	}
 
 	@Test
 	void testExactBrandSearch()
 	{
-		Page<Vehicle> result = search.search("Ford", PageRequest.of(0, 10), SortMode.Relevance);
+		Page<Vehicle> result = search.search("Ford", PageRequest.of(0, 10), SortMode.Relevance, FilterMode.Any);
 
 		assertEquals(2, result.getTotalElements());
 		assertTrue(result.getContent().contains(fordFocus));
@@ -75,7 +77,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testExactModelSearch()
 	{
-		Page<Vehicle> result = search.search("Focus", PageRequest.of(0, 10), SortMode.Relevance);
+		Page<Vehicle> result = search.search("Focus", PageRequest.of(0, 10), SortMode.Relevance, FilterMode.Any);
 
 		assertEquals(1, result.getTotalElements());
 		assertEquals(fordFocus, result.getContent().get(0));
@@ -84,7 +86,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testCaseInsensitiveSearch()
 	{
-		Page<Vehicle> result = search.search("fOrD", PageRequest.of(0, 10), SortMode.Relevance);
+		Page<Vehicle> result = search.search("fOrD", PageRequest.of(0, 10), SortMode.Relevance, FilterMode.Any);
 
 		assertEquals(2, result.getTotalElements());
 	}
@@ -92,7 +94,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testSearchNormalizesWhitespace()
 	{
-		Page<Vehicle> result = search.search("  FORD   FOCUS  ", PageRequest.of(0, 10), SortMode.Relevance);
+		Page<Vehicle> result = search.search("  FORD   FOCUS  ", PageRequest.of(0, 10), SortMode.Relevance, FilterMode.Any);
 
 		assertEquals(2, result.getTotalElements());
 		assertEquals(fordFocus, result.getContent().get(0));
@@ -101,7 +103,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testFuzzySearch()
 	{
-		Page<Vehicle> result = search.search("Focs", PageRequest.of(0, 10), SortMode.Relevance);
+		Page<Vehicle> result = search.search("Focs", PageRequest.of(0, 10), SortMode.Relevance, FilterMode.Any);
 
 		assertTrue(result.getContent().contains(fordFocus));
 	}
@@ -109,7 +111,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testSearchMatchesBrandAndModel()
 	{
-		Page<Vehicle> result = search.search("Ford Focus", PageRequest.of(0, 10), SortMode.Relevance);
+		Page<Vehicle> result = search.search("Ford Focus", PageRequest.of(0, 10), SortMode.Relevance, FilterMode.Any);
 
 		assertEquals(2, result.getTotalElements());
 		assertEquals(fordFocus, result.getContent().get(0));
@@ -118,7 +120,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testSearchReturnsMostRelevantFirst()
 	{
-		Page<Vehicle> result = search.search("Ford Focus", PageRequest.of(0, 10), SortMode.Relevance);
+		Page<Vehicle> result = search.search("Ford Focus", PageRequest.of(0, 10), SortMode.Relevance, FilterMode.Any);
 
 		assertEquals(fordFocus, result.getContent().get(0));
 	}
@@ -126,7 +128,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testSortByPriceAscending()
 	{
-		Page<Vehicle> result = search.search("", PageRequest.of(0, 10), SortMode.PriceAsc);
+		Page<Vehicle> result = search.search("", PageRequest.of(0, 10), SortMode.PriceAsc, FilterMode.Any);
 
 		assertEquals(List.of(fordFiesta, fordFocus, toyotaCorolla, volkswagenGolf), result.getContent());
 	}
@@ -134,15 +136,31 @@ class VehicleSearchUnitTests
 	@Test
 	void testSortByPriceDescending()
 	{
-		Page<Vehicle> result = search.search("", PageRequest.of(0, 10), SortMode.PriceDesc);
+		Page<Vehicle> result = search.search("", PageRequest.of(0, 10), SortMode.PriceDesc, FilterMode.Any);
 
 		assertEquals(List.of(volkswagenGolf, toyotaCorolla, fordFocus, fordFiesta), result.getContent());
 	}
 
 	@Test
+	void testFilterBySale()
+	{
+		Page<Vehicle> result = search.search("", PageRequest.of(0, 10), SortMode.Relevance, FilterMode.Sale);
+
+		assertEquals(List.of(fordFocus, fordFiesta, toyotaCorolla), result.getContent());
+	}
+
+	@Test
+	void testFilterByRent()
+	{
+		Page<Vehicle> result = search.search("", PageRequest.of(0, 10), SortMode.Relevance, FilterMode.Rent);
+
+		assertEquals(List.of(volkswagenGolf), result.getContent());
+	}
+
+	@Test
 	void testFirstPage()
 	{
-		Page<Vehicle> result = search.search("", PageRequest.of(0, 2), SortMode.PriceAsc);
+		Page<Vehicle> result = search.search("", PageRequest.of(0, 2), SortMode.PriceAsc, FilterMode.Any);
 
 		assertEquals(4, result.getTotalElements());
 		assertEquals(2, result.getTotalPages());
@@ -156,7 +174,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testSecondPage()
 	{
-		Page<Vehicle> result = search.search("", PageRequest.of(1, 2), SortMode.PriceAsc);
+		Page<Vehicle> result = search.search("", PageRequest.of(1, 2), SortMode.PriceAsc, FilterMode.Any);
 
 		assertEquals(4, result.getTotalElements());
 		assertEquals(2, result.getContent().size());
@@ -169,7 +187,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testPageBeyondAvailableResults()
 	{
-		Page<Vehicle> result = search.search("", PageRequest.of(5, 2), SortMode.PriceAsc);
+		Page<Vehicle> result = search.search("", PageRequest.of(5, 2), SortMode.PriceAsc, FilterMode.Any);
 
 		assertTrue(result.getContent().isEmpty());
 		assertEquals(4, result.getTotalElements());
@@ -179,7 +197,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testPageWithNoMatches()
 	{
-		Page<Vehicle> result = search.search("zzzzzzzz", PageRequest.of(0, 10), SortMode.Relevance);
+		Page<Vehicle> result = search.search("zzzzzzzz", PageRequest.of(0, 10), SortMode.Relevance, FilterMode.Any);
 
 		assertTrue(result.getContent().isEmpty());
 		assertEquals(0, result.getTotalElements());
@@ -189,7 +207,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testNullQuery()
 	{
-		Page<Vehicle> result = search.search(null, PageRequest.of(0, 10), SortMode.PriceAsc);
+		Page<Vehicle> result = search.search(null, PageRequest.of(0, 10), SortMode.PriceAsc, FilterMode.Any);
 
 		assertEquals(4, result.getTotalElements());
 	}
@@ -197,7 +215,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testBlankQuery()
 	{
-		Page<Vehicle> result = search.search("   ", PageRequest.of(0, 10), SortMode.PriceAsc);
+		Page<Vehicle> result = search.search("   ", PageRequest.of(0, 10), SortMode.PriceAsc, FilterMode.Any);
 
 		assertEquals(4, result.getTotalElements());
 	}
@@ -205,7 +223,7 @@ class VehicleSearchUnitTests
 	@Test
 	void testRepositoryFiltersAvailability()
 	{
-		search.search("Ford", PageRequest.of(0, 10), SortMode.Relevance);
+		search.search("Ford", PageRequest.of(0, 10), SortMode.Relevance, FilterMode.Any);
 
 		verify(vehicles).findByAvailabilityGreaterThan(0);
 	}
