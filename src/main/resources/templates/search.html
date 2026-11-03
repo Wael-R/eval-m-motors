@@ -3,16 +3,34 @@
 <main>
 	<h2 class="mb-4"><span id="searchPrefix">Résultats pour</span> <span class="fw-light" id="searchTitle"></span></h2>
 
-	<p class="mb-1" id="sortHead">Trier par...</p>
-	<div class="btn-group mb-4" role="group" aria-labelledby="sortHead">
-		<input type="radio" class="btn-check" name="sort" id="sortRelevance" autocomplete="off" checked>
-		<label for="sortRelevance" class="btn btn-sm btn-outline-success">Pertinence</label>
+	<div class="d-flex flex-row">
+		<div class="me-3">
+			<p class="mb-1" id="sortHead">Trier par...</p>
+			<div class="btn-group mb-4" role="group" aria-labelledby="sortHead">
+				<input type="radio" class="btn-check" name="sort" id="sortRelevance" autocomplete="off" checked>
+				<label for="sortRelevance" class="btn btn-sm btn-outline-success">Pertinence</label>
 
-		<input type="radio" class="btn-check" name="sort" id="sortPriceAsc" autocomplete="off">
-		<label for="sortPriceAsc" class="btn btn-sm btn-outline-success">Moins cher</label>
+				<input type="radio" class="btn-check" name="sort" id="sortPriceAsc" autocomplete="off">
+				<label for="sortPriceAsc" class="btn btn-sm btn-outline-success">Moins cher</label>
 
-		<input type="radio" class="btn-check" name="sort" id="sortPriceDesc" autocomplete="off">
-		<label for="sortPriceDesc" class="btn btn-sm btn-outline-success">Plus cher</label>
+				<input type="radio" class="btn-check" name="sort" id="sortPriceDesc" autocomplete="off">
+				<label for="sortPriceDesc" class="btn btn-sm btn-outline-success">Plus cher</label>
+			</div>
+		</div>
+
+		<div class="me-3">
+			<p class="mb-1" id="filterHead">Filtrer par...</p>
+			<div class="btn-group mb-4" role="group" aria-labelledby="filterHead">
+				<input type="radio" class="btn-check" name="filter" id="filterAny" autocomplete="off" checked>
+				<label for="filterAny" class="btn btn-sm btn-outline-success">Tous</label>
+
+				<input type="radio" class="btn-check" name="filter" id="filterSale" autocomplete="off">
+				<label for="filterSale" class="btn btn-sm btn-outline-success">À vendre</label>
+
+				<input type="radio" class="btn-check" name="filter" id="filterRent" autocomplete="off">
+				<label for="filterRent" class="btn btn-sm btn-outline-success">À louer</label>
+			</div>
+		</div>
 	</div>
 
 	<p id="error" class="d-none">Aucun résultats</p>
@@ -23,7 +41,14 @@
 				<div class="card h-100">
 					<img src="/missing.png" class="card-img-top object-fit-cover" style="aspect-ratio: 16/9;">
 					<div class="card-body overflow-hidden">
-						<h6 class="card-title" data-title></h6>
+						<div class="row gx-0">
+							<div class="col-12 col-md-8">
+								<h6 class="card-title mb-0 mb-md-2" data-title></h6>
+							</div>
+							<div class="col-12 col-md-4">
+								<p class="card-text text-md-end mb-2 mb-md-0" data-type></p>
+							</div>
+						</div>
 						<p class="card-text" data-price></p>
 						<p class="card-text" data-desc></p>
 					</div>
@@ -40,11 +65,16 @@
 		let page = params.get("page") ?? 0;
 		let query = params.get("query") ?? "";
 		let sort = 0;
+		let filter = 0;
 		let numPages = 0;
 
 		$("#sortRelevance").on("change", (ev) => {sort = 0; loadPage();});
 		$("#sortPriceAsc").on("change",  (ev) => {sort = 1; loadPage();});
 		$("#sortPriceDesc").on("change", (ev) => {sort = 2; loadPage();});
+
+		$("#filterAny").on("change",  (ev) => {filter = 0; loadPage();});
+		$("#filterSale").on("change", (ev) => {filter = 1; loadPage();});
+		$("#filterRent").on("change", (ev) => {filter = 2; loadPage();});
 
 		card.detach();
 
@@ -68,7 +98,7 @@
 			else
 				$("#searchPrefix").text("Résultats");
 
-			xhr("/api/vehicles/search", "GET", null, {page: page, query: query, sort: sort, size: 16},
+			xhr("/api/vehicles/search", "GET", null, {page: page, query: query, sort: sort, filter: filter, size: 16},
 				onSuccess = (req, json) => {
 					$("#vehicleList").children().remove();
 					$("#error").addClass("d-none");
@@ -84,6 +114,7 @@
 						$("[data-title]", c).text(`${v.brand} ${v.model}`);
 						$("[data-price]", c).text(`${v.price}€`);
 						$("[data-desc]", c).text(v.description.substr(0, 60));
+						$("[data-type]", c).text(v.forRenting ? "à louer" : "à vendre");
 
 						$("#vehicleList").append(c);
 					});

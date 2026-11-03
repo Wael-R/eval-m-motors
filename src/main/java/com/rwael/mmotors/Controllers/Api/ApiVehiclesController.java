@@ -15,6 +15,7 @@ import com.rwael.mmotors.ApiResult;
 import com.rwael.mmotors.Database.Vehicle;
 import com.rwael.mmotors.Database.VehicleRepository;
 import com.rwael.mmotors.Database.VehicleSearchService;
+import com.rwael.mmotors.Database.VehicleSearchService.FilterMode;
 import com.rwael.mmotors.Database.VehicleSearchService.SortMode;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -49,7 +50,7 @@ public class ApiVehiclesController
 	}
 
 	@GetMapping("/search")
-	public Page<Vehicle> getSearch(@RequestParam(defaultValue = "") String query, @RequestParam(defaultValue = "0") Integer sort, HttpServletResponse response, @PageableDefault(size = 20) Pageable pageable)
+	public Page<Vehicle> getSearch(@RequestParam(defaultValue = "") String query, @RequestParam(defaultValue = "0") Integer sort, @RequestParam(defaultValue = "0") Integer filter, HttpServletResponse response, @PageableDefault(size = 20) Pageable pageable)
 	{
 		if(pageable.getPageSize() > 20)
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Taille de page limitée à 20 éléments");
@@ -61,7 +62,14 @@ public class ApiVehiclesController
 		else if(sort == 2)
 			mode = SortMode.PriceDesc;
 
-		return search.search(query, pageable, mode);
+		FilterMode filterMode = FilterMode.Any;
+
+		if(filter == 1)
+			filterMode = FilterMode.Sale;
+		else if(filter == 2)
+			filterMode = FilterMode.Rent;
+
+		return search.search(query, pageable, mode, filterMode);
 	}
 
 	@GetMapping("/details/{id}")

@@ -32,7 +32,14 @@ public class VehicleSearchService
 		PriceAsc
 	}
 
-	public Page<Vehicle> search(String query, Pageable pageable, SortMode mode)
+	public enum FilterMode
+	{
+		Any,
+		Sale,
+		Rent
+	}
+
+	public Page<Vehicle> search(String query, Pageable pageable, SortMode mode, FilterMode filter)
 	{
 		String search = normalize(query);
 
@@ -43,6 +50,14 @@ public class VehicleSearchService
 				vehicle.getPrice()
 			))
 			.filter(match -> match.score() >= 0.75);
+
+		switch(filter)
+		{
+			// case Any:  stream = stream.filter(match -> ); break;
+			case Sale: stream = stream.filter(match -> !match.vehicle().getForRenting()); break;
+			case Rent: stream = stream.filter(match -> match.vehicle().getForRenting()); break;
+			default: break;
+		}
 
 		switch(mode)
 		{
