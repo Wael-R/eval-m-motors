@@ -25,10 +25,10 @@
 			<h3 class="my-0">[[${vehicle.brand} + ' ' + ${vehicle.model}]]</h3>
 		</div>
 		<div class="col-4 col-md-2 text-end text-md-center align-content-center">
-			<span class="fw-semibold">[[${vehicle.price}]]€</span>
+			<span class="fw-semibold">[[${vehicle.forRenting} ? ${vehicle.price} + '€/mois' : ${vehicle.price} + '€']]</span>
 		</div>
 		<div class="col-12 mt-2 mt-md-0 col-md-5">
-			<a th:href="'/private/order/' + ${vehicle.id}" class="w-100 h-100 btn btn-success">Acheter</a>
+			<a th:href="'/private/order/' + ${vehicle.id}" class="w-100 h-100 btn btn-success">[[${vehicle.forRenting} ? 'Louer' : 'Acheter']]</a>
 		</div>
 	</div>
 

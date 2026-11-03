@@ -112,7 +112,7 @@
 						$("img", c).attr("srcset", v.thumbs[0]?.path);
 						$("a", c).attr("href", `/vehicles/${v.id}`);
 						$("[data-title]", c).text(`${v.brand} ${v.model}`);
-						$("[data-price]", c).text(`${v.price}€`);
+						$("[data-price]", c).text(v.forRenting ? `${v.price}€/mois` : `${v.price}€`);
 						$("[data-desc]", c).text(v.description.substr(0, 60));
 						$("[data-type]", c).text(v.forRenting ? "à louer" : "à vendre");
 
