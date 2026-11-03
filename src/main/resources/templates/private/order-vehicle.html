@@ -4,12 +4,20 @@
 	<h2>Demande d'achat : <span class="fw-light">[[${vehicle.brand} + ' ' + ${vehicle.model}]]</span></h2>
 
 	<form id="order">
-		<div class="my-3 row">
-			<div class="col-12 col-lg-2">
-				<label for="inputForm" class="form-label">Dossier d'achat</label>
+		<div class="my-3">
+			<label for="inputForm" class="form-label">Dossier d'achat</label>
+			<input type="file" class="form-control" id="inputForm" accept=".pdf" required>
+		</div>
+
+		<div class="my-3 row" th:if="${vehicle.forRenting}">
+			<div class="col-6">
+				<label for="inputStart" class="form-label">Date de début</label>
+				<input type="date" class="form-control" id="inputStart" required>
 			</div>
-			<div class="col-12 col-lg-10">
-				<input type="file" class="form-control" id="inputForm" accept=".pdf" required>
+	
+			<div class="col-6">
+				<label for="inputStart" class="form-label">Date de fin</label>
+				<input type="date" class="form-control" id="inputEnd" required>
 			</div>
 		</div>
 
@@ -24,6 +32,7 @@
 
 	<script th:inline="javascript">
 		const vehicleId = /*[[${vehicle.id}]]*/ 0;
+		const renting = /*[[${vehicle.forRenting}]]*/ false;
 		const btn = $("#submit");
 		let files = null;
 
@@ -44,7 +53,13 @@
 
 			btn.attr("disabled", "");
 
-			xhr("/api/private/order", "POST", files, {id: vehicleId},
+			const data = renting ? {
+				id: vehicleId,
+				start: $("#inputStart").val(),
+				end: $("#inputEnd").val()
+			} : {id: vehicleId}
+
+			xhr("/api/private/order", "POST", files, data,
 				onSuccess = (req) => {
 					location.replace("/private/");
 				},
