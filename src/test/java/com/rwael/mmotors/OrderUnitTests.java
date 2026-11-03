@@ -15,6 +15,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -77,6 +79,7 @@ public class OrderUnitTests
 	ApiPrivateController controller;
 
 	Vehicle vehicle;
+	Vehicle rentVehicle;
 	User user;
 	FileReference reference;
 	MockMultipartFile upload;
@@ -90,6 +93,15 @@ public class OrderUnitTests
 		vehicle.setModel("Focus");
 		vehicle.setAvailability(2);
 		vehicle.setPrice(15000);
+		vehicle.setForRenting(false);
+
+		rentVehicle = new Vehicle();
+		rentVehicle.setId(2);
+		rentVehicle.setBrand("Citroen");
+		rentVehicle.setModel("C3");
+		rentVehicle.setAvailability(2);
+		rentVehicle.setPrice(15000);
+		rentVehicle.setForRenting(true);
 
 		user = new User();
 		user.setEmail("a@b.c");
@@ -230,6 +242,76 @@ public class OrderUnitTests
 		assertNull(saved.getApprovalDate());
 		assertTrue(saved.getDate() != null);
 
+		verify(files).getReference(upload, user);
+	}
+
+	@Test
+	void testRentOrderNoStartDate() throws Exception
+	{
+		when(vehicles.findById(2)).thenReturn(Optional.of(rentVehicle));
+
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 2, null, Date.valueOf(LocalDate.now().plusDays(8)), user, response);
+
+		assertFalse(result.isSuccess());
+		assertEquals("La date de départ de la location est obligatoire", result.getMessage());
+
+		verify(orders, never()).save(any(Order.class));
+		verify(files, never()).getReference(upload, user);
+	}
+
+	@Test
+	void testRentOrderNoEndDate() throws Exception
+	{
+		when(vehicles.findById(2)).thenReturn(Optional.of(rentVehicle));
+
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 2, Date.valueOf(LocalDate.now().plusDays(1)), null, user, response);
+
+		assertFalse(result.isSuccess());
+		assertEquals("La date de fin de la location est obligatoire", result.getMessage());
+
+		verify(orders, never()).save(any(Order.class));
+		verify(files, never()).getReference(upload, user);
+	}
+
+	@Test
+	void testRentOrderInvalidStartDate() throws Exception
+	{
+		when(vehicles.findById(2)).thenReturn(Optional.of(rentVehicle));
+
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 2, Date.valueOf(LocalDate.now().minusDays(1)), Date.valueOf(LocalDate.now().plusDays(8)), user, response);
+
+		assertFalse(result.isSuccess());
+		assertEquals("La date de départ doit être dans le futur", result.getMessage());
+
+		verify(orders, never()).save(any(Order.class));
+		verify(files, never()).getReference(upload, user);
+	}
+
+	@Test
+	void testRentOrderInvalidEndDate() throws Exception
+	{
+		when(vehicles.findById(2)).thenReturn(Optional.of(rentVehicle));
+
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 2, Date.valueOf(LocalDate.now().plusDays(1)), Date.valueOf(LocalDate.now().minusDays(1)), user, response);
+
+		assertFalse(result.isSuccess());
+		assertEquals("La date de fin doit être après la date de départ", result.getMessage());
+
+		verify(orders, never()).save(any(Order.class));
+		verify(files, never()).getReference(upload, user);
+	}
+
+	@Test
+	void testValidRentOrder() throws Exception
+	{
+		when(vehicles.findById(2)).thenReturn(Optional.of(rentVehicle));
+		when(files.getReference(any(MultipartFile.class), any(User.class))).thenReturn(reference);
+
+		ApiResult result = controller.postOrder(new MultipartFile[]{upload}, 2, Date.valueOf(LocalDate.now().plusDays(1)), Date.valueOf(LocalDate.now().plusDays(8)), user, response);
+
+		assertTrue(result.isSuccess());
+
+		verify(orders).save(any(Order.class));
 		verify(files).getReference(upload, user);
 	}
 
