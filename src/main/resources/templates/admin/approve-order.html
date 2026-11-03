@@ -4,6 +4,8 @@
 	<h2>Validation du dossier pour <a th:href="'/vehicles/' + ${order.vehicle.id}" th:text="${order.vehicle.brand} + ' ' + ${order.vehicle.model}" class="fw-light"></a></h2>
 
 	<p th:text="'Soumis par ' + ${order.user.lastName} + ' ' + ${order.user.firstName}"></p>
+	<p th:text="'Début : ' + ${#dates.format(order.startDate, 'dd/MM/yyyy')}" th:if="${order.vehicle.forRenting}"></p>
+	<p th:text="'Fin : ' + ${#dates.format(order.endDate, 'dd/MM/yyyy')}" th:if="${order.vehicle.forRenting}"></p>
 
 	<iframe th:src="${order.form.path}" frameborder="0" width="100%" height="800" class="my-3"></iframe>
 
