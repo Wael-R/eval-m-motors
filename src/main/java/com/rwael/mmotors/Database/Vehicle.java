@@ -35,7 +35,7 @@ import lombok.ToString;
 public class Vehicle
 {
 	@Id 
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer id;
 
 	@NotBlank(message = "La marque est obligatoire")

@@ -27,7 +27,7 @@ import tools.jackson.databind.ser.std.StdSerializer;
 public class FileReference
 {
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer id;
 
 	@NotNull

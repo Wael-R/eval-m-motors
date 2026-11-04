@@ -26,7 +26,7 @@ import lombok.ToString;
 public class User implements UserDetails
 {
 	@Id 
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer id;
 
 	@Email(message = "Adresse e-mail invalide")
