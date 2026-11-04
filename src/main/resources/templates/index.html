@@ -1,6 +1,58 @@
 <!DOCTYPE html>
 <html th:replace="~{base::layout(~{::main}, '', _)}">
 <main>
-	TODO
+	<h2 class="mb-4">Nouveautés</h2>
+
+	<div th:if="${#lists.size(sale)} > 0">
+		<h3>En vente</h3>
+
+		<div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+			<div class="col" style="aspect-ratio: 5/6;" th:each="vehicle : ${sale}">
+				<a th:href="'/vehicles/' + ${vehicle.id}" class="text-decoration-none">
+					<div class="card h-100">
+						<img th:srcset="${#lists.size(vehicle.thumbs)} > 0 ? ${vehicle.thumbs[0].path}" src="/missing.png" class="card-img-top object-fit-cover" style="aspect-ratio: 16/9;">
+						<div class="card-body overflow-hidden">
+							<div class="row gx-0">
+								<div class="col-12 col-md-8">
+									<h6 class="card-title mb-0 mb-md-2" th:text="${vehicle.brand} + ' ' + ${vehicle.model}"></h6>
+								</div>
+								<div class="col-12 col-md-4">
+									<p class="card-text text-md-end mb-2 mb-md-0">à vendre</p>
+								</div>
+							</div>
+							<p class="card-text">[[${vehicle.price}]]€</p>
+							<p class="card-text" th:text="${#strings.abbreviate(vehicle.description, 30)}"></p>
+						</div>
+					</div>
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<div th:if="${#lists.size(rent)} > 0">
+		<h3>En location</h3>
+
+		<div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+			<div class="col" style="aspect-ratio: 5/6;" th:each="vehicle : ${rent}">
+				<a th:href="'/vehicles/' + ${vehicle.id}" class="text-decoration-none">
+					<div class="card h-100">
+						<img th:srcset="${#lists.size(vehicle.thumbs)} > 0 ? ${vehicle.thumbs[0].path}" src="/missing.png" class="card-img-top object-fit-cover" style="aspect-ratio: 16/9;">
+						<div class="card-body overflow-hidden">
+							<div class="row gx-0">
+								<div class="col-12 col-md-8">
+									<h6 class="card-title mb-0 mb-md-2" th:text="${vehicle.brand} + ' ' + ${vehicle.model}"></h6>
+								</div>
+								<div class="col-12 col-md-4">
+									<p class="card-text text-md-end mb-2 mb-md-0">à louer</p>
+								</div>
+							</div>
+							<p class="card-text">[[${vehicle.price}]]€/mois</p>
+							<p class="card-text" th:text="${#strings.abbreviate(vehicle.description, 30)}"></p>
+						</div>
+					</div>
+				</a>
+			</div>
+		</div>
+	</div>
 </main>
 </html>

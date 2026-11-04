@@ -5,6 +5,8 @@ import java.net.URLConnection;
 import java.util.List;
 
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +45,11 @@ public class HomeController extends ControllerBase
 	@GetMapping("/")
 	public String getIndex(Model model)
 	{
+		Pageable page = PageRequest.of(0, 4);
+
+		model.addAttribute("sale", vehicles.findByForRenting(false, page).toList());
+		model.addAttribute("rent", vehicles.findByForRenting(true, page).toList());
+
 		return "index";
 	}
 
