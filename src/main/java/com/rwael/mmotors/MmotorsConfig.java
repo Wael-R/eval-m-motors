@@ -55,6 +55,7 @@ public class MmotorsConfig
 	{
 		var cfg = new PropertySourcesPlaceholderConfigurer();
 		cfg.setLocation(new FileSystemResource(".env"));
+		cfg.setIgnoreResourceNotFound(true);
 		return cfg;
 	}
 }
