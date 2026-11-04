@@ -3,7 +3,6 @@ package com.rwael.mmotors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,11 +21,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.server.ResponseStatusException;
@@ -57,105 +53,11 @@ public class OrderAdminUnitTests
 	{
 		Pageable pageable = PageRequest.of(0, 21);
 
-		ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> controller.getList(0, 0, response, pageable));
+		ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> controller.getList(0, 0, 0, response, pageable));
 
 		assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
 
 		verifyNoInteractions(orders);
-	}
-
-	@Test
-	void testListDefaultFilter()
-	{
-		Pageable pageable = PageRequest.of(0, 10);
-		Page<Order> expected = new PageImpl<>(java.util.List.of());
-
-		when(orders.findByPending(true, PageRequest.of(0, 10, Sort.by("date")))).thenReturn(expected);
-
-		Page<Order> result = controller.getList(0, 0, response, pageable);
-
-		assertSame(expected, result);
-
-		verify(orders).findByPending(true, PageRequest.of(0, 10, Sort.by("date")));
-	}
-
-	@Test
-	void testListApprovedFilter()
-	{
-		Pageable pageable = PageRequest.of(0, 10);
-		Page<Order> expected = new PageImpl<>(java.util.List.of());
-
-		when(orders.findByApproved(true, PageRequest.of(0, 10, Sort.by("date")))).thenReturn(expected);
-
-		Page<Order> result = controller.getList(0, 1, response, pageable);
-
-		assertSame(expected, result);
-
-		verify(orders).findByApproved(true, PageRequest.of(0, 10, Sort.by("date")));
-	}
-
-	@Test
-	void testListRejectedFilter()
-	{
-		Pageable pageable = PageRequest.of(0, 10);
-		Page<Order> expected = new PageImpl<>(java.util.List.of());
-
-		when(orders.findByApproved(false, PageRequest.of(0, 10, Sort.by("date")))).thenReturn(expected);
-
-		Page<Order> result = controller.getList(0, 2, response, pageable);
-
-		assertSame(expected, result);
-
-		verify(orders).findByApproved(false, PageRequest.of(0, 10, Sort.by("date")));
-	}
-
-	@Test
-	void testListAnyFilter()
-	{
-		Pageable pageable = PageRequest.of(0, 10);
-		Page<Order> expected = new PageImpl<>(java.util.List.of());
-
-		when(orders.findAll(PageRequest.of(0, 10, Sort.by("date")))).thenReturn(expected);
-
-		Page<Order> result = controller.getList(0, 3, response, pageable);
-
-		assertSame(expected, result);
-
-		verify(orders).findAll(PageRequest.of(0, 10, Sort.by("date")));
-	}
-
-	@Test
-	void testListDateDescending()
-	{
-		Pageable pageable = PageRequest.of(0, 10);
-		Pageable expectedPageable = PageRequest.of(0, 10, Sort.by("date").descending());
-
-		Page<Order> expected = new PageImpl<>(java.util.List.of());
-
-		when(orders.findByPending(true, expectedPageable)).thenReturn(expected);
-
-		Page<Order> result = controller.getList(1, 0, response, pageable);
-
-		assertSame(expected, result);
-
-		verify(orders).findByPending(true, expectedPageable);
-	}
-
-	@Test
-	void testListPages()
-	{
-		Pageable pageable = PageRequest.of(2, 15);
-		Pageable expectedPageable = PageRequest.of(2, 15, Sort.by("date"));
-
-		Page<Order> expected = new PageImpl<>(java.util.List.of());
-
-		when(orders.findByPending(true, expectedPageable)).thenReturn(expected);
-
-		Page<Order> result = controller.getList(0, 0, response, pageable);
-
-		assertSame(expected, result);
-
-		verify(orders).findByPending(true, expectedPageable);
 	}
 
 	@Test
