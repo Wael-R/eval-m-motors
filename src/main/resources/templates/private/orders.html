@@ -67,6 +67,7 @@
 				<div class="modal-body">
 					<p class="card-text fw-light">Déposé le <span id="previewDate">DD/MM/YYYY HH:MM</span></p>
 					<p class="card-text fw-light" id="previewStatus">En cours</p>
+					<p class="card-text" id="previewRentDate"></p>
 					<iframe src="" frameborder="0" width="100%" height="800" id="preview" class="mt-3"></iframe>
 				</div>
 				<div class="modal-footer">
@@ -94,6 +95,15 @@
 	$("#filterDenied").on("change",   (ev) => {filter = 2; loadPage();});
 	$("#filterAny").on("change",      (ev) => {filter = 3; loadPage();});
 
+	function formatDate(src)
+	{
+		const d = new Date(src);
+		const date = d.toLocaleDateString("fr-FR");
+		const time = d.toLocaleTimeString("fr-FR");
+
+		return {date: date, time: time};
+	}
+
 	function loadPage()
 	{
 		xhr("/api/private/orders/list", "GET", null, {page: page, sort: sort, filter: filter, size: 16},
@@ -110,18 +120,14 @@
 					const c = card.clone();
 					$("a", c).attr("href", `/vehicles/${o.vehicle.id}`);
 					$("[data-title]", c).text(name);
-					const d = new Date(o.date);
-					const date = d.toLocaleDateString("fr-FR");
-					const time = d.toLocaleTimeString("fr-FR");
+					const {date, time} = formatDate(o.date);
 					$("[data-date]", c).text(`${date}, à ${time}`);
 
 					let status = "En cours";
 
 					if(o.approvalDate)
 					{
-						const d = new Date(o.approvalDate);
-						const date = d.toLocaleDateString("fr-FR");
-						const time = d.toLocaleTimeString("fr-FR");
+						const {date, time} = formatDate(o.approvalDate);
 
 						if(o.approved)
 							status = `Validé le ${date}, à ${time}`;
@@ -138,6 +144,16 @@
 						$("#previewDate").text(`${date}, à ${time}`);
 						$("#previewStatus").text(status);
 						$("#preview").attr("src", o.form.path);
+
+						if(o.vehicle.forRenting)
+						{
+							const {date: start} = formatDate(o.startDate);
+							const {date: end} = formatDate(o.endDate);
+
+							$("#previewRentDate").text(`Pour location de ${start} à ${end}`);
+						}
+						else
+							$("#previewRentDate").text("");
 
 						modal.show();
 					});
