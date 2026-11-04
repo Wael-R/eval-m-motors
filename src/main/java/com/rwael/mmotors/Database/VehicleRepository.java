@@ -13,5 +13,5 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Integer>
 	Vehicle findByBrandAndModel(String brand, String model);
 	List<Vehicle> findByAvailabilityGreaterThan(Integer availability);
 	Page<Vehicle> findByBrandContainingIgnoreCaseOrModelContainingIgnoreCase(String brand, String model, Pageable pageable);
-	Page<Vehicle> findByForRenting(boolean forRenting, Pageable pageable);
+	Page<Vehicle> findByForRentingAndAvailabilityGreaterThan(boolean forRenting, Integer availability, Pageable pageable);
 }

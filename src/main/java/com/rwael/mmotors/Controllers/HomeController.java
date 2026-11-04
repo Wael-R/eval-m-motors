@@ -47,8 +47,8 @@ public class HomeController extends ControllerBase
 	{
 		Pageable page = PageRequest.of(0, 4);
 
-		model.addAttribute("sale", vehicles.findByForRenting(false, page).toList());
-		model.addAttribute("rent", vehicles.findByForRenting(true, page).toList());
+		model.addAttribute("sale", vehicles.findByForRentingAndAvailabilityGreaterThan(false, 0, page).toList());
+		model.addAttribute("rent", vehicles.findByForRentingAndAvailabilityGreaterThan(true, 0, page).toList());
 
 		return "index";
 	}
