@@ -2,6 +2,7 @@ package com.rwael.mmotors.Controllers.Api;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,8 @@ import com.rwael.mmotors.ApiResult;
 import com.rwael.mmotors.Database.Order;
 import com.rwael.mmotors.Database.OrderRepository;
 import com.rwael.mmotors.Database.OrderSpecifications;
+import com.rwael.mmotors.Database.Vehicle;
+import com.rwael.mmotors.Database.VehicleRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -28,10 +31,12 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ApiAdminOrdersController
 {
 	private final OrderRepository orders;
+	private final VehicleRepository vehicles;
 
-	public ApiAdminOrdersController(OrderRepository orders)
+	public ApiAdminOrdersController(OrderRepository orders, VehicleRepository vehicles)
 	{
 		this.orders = orders;
+		this.vehicles = vehicles;
 	}
 
 	@GetMapping("/list")
@@ -76,8 +81,34 @@ public class ApiAdminOrdersController
 		if(o.getApprovalDate() != null)
 			return ApiResult.Get(false, "Ce dossier a déjà été validé", response);
 
+		if(o.getVehicle().getAvailability() <= 0 && approved)
+			return ApiResult.Get(false, "Ce véhicule n'est plus disponible", response);
+
 		o.setApproved(approved);
 		o.setApprovalDate(Timestamp.valueOf(LocalDateTime.now()));
+
+		if(approved)
+		{
+			Vehicle v = o.getVehicle();
+
+			v.setAvailability(v.getAvailability() - 1);
+
+			if(v.getAvailability() <= 0)
+			{
+				List<Order> pending = orders.findAll(OrderSpecifications.pending(true));
+
+				for(Order other : pending)
+				{
+					if(other.getId().equals(o.getId()))
+						continue;
+
+					other.setApproved(false);
+					other.setApprovalDate(Timestamp.valueOf(LocalDateTime.now()));
+				}
+			}
+
+			vehicles.save(v);
+		}
 
 		orders.save(o);
 		return ApiResult.Get(true, "", response);
