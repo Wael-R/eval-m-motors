@@ -30,12 +30,17 @@ import org.springframework.web.server.ResponseStatusException;
 import com.rwael.mmotors.Controllers.Api.ApiAdminOrdersController;
 import com.rwael.mmotors.Database.Order;
 import com.rwael.mmotors.Database.OrderRepository;
+import com.rwael.mmotors.Database.Vehicle;
+import com.rwael.mmotors.Database.VehicleRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderAdminUnitTests
 {
 	@Mock
 	private OrderRepository orders;
+
+	@Mock
+	private VehicleRepository vehicles;
 
 	@InjectMocks
 	private ApiAdminOrdersController controller;
@@ -78,6 +83,9 @@ public class OrderAdminUnitTests
 	void testDuplicateApproveOrder()
 	{
 		Order order = new Order();
+		Vehicle v = new Vehicle();
+		v.setAvailability(1);
+		order.setVehicle(v);
 		order.setApprovalDate(Timestamp.valueOf(LocalDateTime.now()));
 
 		when(orders.findById(1)).thenReturn(Optional.of(order));
@@ -89,12 +97,16 @@ public class OrderAdminUnitTests
 
 		verify(orders).findById(1);
 		verify(orders, never()).save(any());
+		verify(vehicles, never()).save(any());
 	}
 
 	@Test
 	void testApproveOrder()
 	{
 		Order order = new Order();
+		Vehicle v = new Vehicle();
+		v.setAvailability(1);
+		order.setVehicle(v);
 
 		when(orders.findById(1)).thenReturn(Optional.of(order));
 
@@ -106,12 +118,16 @@ public class OrderAdminUnitTests
 		assertNotNull(order.getApprovalDate());
 
 		verify(orders).save(order);
+		verify(vehicles).save(v);
 	}
 
 	@Test
 	void testRejectOrder()
 	{
 		Order order = new Order();
+		Vehicle v = new Vehicle();
+		v.setAvailability(1);
+		order.setVehicle(v);
 
 		when(orders.findById(1)).thenReturn(Optional.of(order));
 
@@ -123,12 +139,16 @@ public class OrderAdminUnitTests
 		assertNotNull(order.getApprovalDate());
 
 		verify(orders).save(order);
+		verify(vehicles, never()).save(any());
 	}
 
 	@Test
 	void testApprovalDate()
 	{
 		Order order = new Order();
+		Vehicle v = new Vehicle();
+		v.setAvailability(1);
+		order.setVehicle(v);
 
 		LocalDateTime before = LocalDateTime.now();
 
