@@ -66,11 +66,8 @@ public class ApiController
 
 			try {
 				users.save(u);
-			} catch(TransactionSystemException e) {
-				String message = "Erreur lors de l'inscription";
-
-				if(e.getRootCause() instanceof ConstraintViolationException ex)
-					message = ex.getConstraintViolations().iterator().next().getMessage();
+			} catch(ConstraintViolationException e) {
+				String message = e.getConstraintViolations().iterator().next().getMessage();
 
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return new ApiResult(false, message);

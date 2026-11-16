@@ -1,6 +1,12 @@
 package com.rwael.mmotors;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.sql.Timestamp;
@@ -64,14 +70,14 @@ class ApiAdminOrdersIntegrationTests
 	private Order oldestOrder;
 	private Order newestOrder;
 
-	private Vehicle createVehicle(boolean forRenting)
+	private Vehicle createVehicle(String model, Integer availability, boolean forRenting)
 	{
 		Vehicle vehicle = new Vehicle();
 		vehicle.setBrand("Test brand");
-		vehicle.setModel(forRenting ? "Rental model" : "Sale model");
+		vehicle.setModel(model);
 		vehicle.setDescription("Test vehicle");
 		vehicle.setPrice(10000);
-		vehicle.setAvailability(5);
+		vehicle.setAvailability(availability);
 		vehicle.setForRenting(forRenting);
 
 		return vehicles.save(vehicle);
@@ -112,8 +118,8 @@ class ApiAdminOrdersIntegrationTests
 		fileRefRepo.deleteAll();
 		fileRepo.deleteAll();
 
-		saleVehicle = createVehicle(false);
-		rentalVehicle = createVehicle(true);
+		saleVehicle = createVehicle("Sale model", 5, false);
+		rentalVehicle = createVehicle("Rental model", 5, true);
 
 		User u = new User();
     u.setEmail("admin@test.com");
@@ -278,5 +284,49 @@ class ApiAdminOrdersIntegrationTests
 		mvc.perform(get("/api/admin/orders/list")
 			.param("size", "21"))
 			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	@WithMockUser(roles = "ADMIN")
+	void testApproveAvailable() throws Exception
+	{
+		Vehicle v = createVehicle("Test", 2, false);
+
+		Order o1 = createOrder(v, false, null, Timestamp.valueOf("2026-01-01 10:00:00"));
+		Order o2 = createOrder(v, false, null, Timestamp.valueOf("2026-01-01 11:00:00"));
+
+		mvc.perform(post("/api/admin/orders/approve").with(csrf())
+			.param("id", o1.getId().toString())
+			.param("approved", "true"))
+			.andExpect(status().isOk());
+
+		// 2 available: first is approved, second remains pending (ie approval date is still null)
+		assertTrue(o1.isApproved());
+		assertNotNull(o1.getApprovalDate());
+
+		assertFalse(o2.isApproved());
+		assertNull(o2.getApprovalDate());
+	}
+
+	@Test
+	@WithMockUser(roles = "ADMIN")
+	void testApproveLastAvailable() throws Exception
+	{
+		Vehicle v = createVehicle("Test", 1, false);
+
+		Order o1 = createOrder(v, false, null, Timestamp.valueOf("2026-01-01 10:00:00"));
+		Order o2 = createOrder(v, false, null, Timestamp.valueOf("2026-01-01 11:00:00"));
+
+		mvc.perform(post("/api/admin/orders/approve").with(csrf())
+			.param("id", o1.getId().toString())
+			.param("approved", "true"))
+			.andExpect(status().isOk());
+
+		// 1 available: first is approved, second is automatically denied
+		assertTrue(o1.isApproved());
+		assertNotNull(o1.getApprovalDate());
+
+		assertFalse(o2.isApproved());
+		assertNotNull(o2.getApprovalDate());
 	}
 }

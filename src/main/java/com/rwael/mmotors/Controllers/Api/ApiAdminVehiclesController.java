@@ -45,11 +45,8 @@ public class ApiAdminVehiclesController
 	{
 		try {
 			vehicles.save(v);
-		} catch(TransactionSystemException e) {
-			String message = "Erreur lors de la modification du véhicule";
-
-			if(e.getRootCause() instanceof ConstraintViolationException ex)
-				message = ex.getConstraintViolations().iterator().next().getMessage();
+		} catch(ConstraintViolationException e) {
+			String message = e.getConstraintViolations().iterator().next().getMessage();
 
 			return ApiResult.Get(false, message, response);
 		} catch(DataIntegrityViolationException e) {
